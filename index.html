@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>THANHPHAT • Phim hay mượt như app</title>
 <meta name="description" content="Duyệt & xem thông tin phim mượt. Dữ liệu từ phimapi.com." />
 <meta name="theme-color" content="#0b1020" />
@@ -23,7 +23,7 @@
 @media(max-width:640px){:root{--hdr-h:72px}}
 *{box-sizing:border-box}
 html,body{height:100%}
-html{scroll-padding-top:calc(var(--hdr-h) + env(safe-area-inset-top,0px))}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:calc(var(--hdr-h) + env(safe-area-inset-top,0px))}
 body{
   margin:0;color:var(--text);
   font-family:"Plus Jakarta Sans",system-ui,Segoe UI,Roboto,Arial,sans-serif;
@@ -31,11 +31,15 @@ body{
     radial-gradient(900px 600px at 50% -200px, rgba(59,130,246,.25), transparent 60%),
     linear-gradient(180deg, rgba(2,6,23,.85), rgba(2,6,23,0)),
     var(--bg);
-  /* KHÔNG CHE TRÊN iOS */
+  /* tránh header đè, an toàn tai thỏ */
   padding-top:calc(var(--hdr-h) + env(safe-area-inset-top,0px));
+  padding-bottom:env(safe-area-inset-bottom,0px);
 }
+a{color:inherit;text-decoration:none}
+input,button,textarea,select{font:inherit}
+.container{max-width:1160px;margin:0 auto;padding:0 12px}
 
-/* ===== Header cố định + safe-area iOS ===== */
+/* ===== Header (fixed, safe-area) ===== */
 .hdr{
   position:fixed;top:0;left:0;right:0;z-index:1000;
   backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
@@ -43,7 +47,6 @@ body{
   border-bottom:1px solid rgba(255,255,255,.06);
   padding-top:env(safe-area-inset-top,0px);
 }
-.container{max-width:1160px;margin:0 auto;padding:0 12px}
 .hdr__row{
   display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;
   padding:10px 12px;min-height:var(--hdr-h);
@@ -53,26 +56,22 @@ body{
   background:linear-gradient(90deg,#c7d2fe,#f0abfc);
   -webkit-background-clip:text;background-clip:text;color:transparent;
   text-shadow:0 0 16px rgba(124,58,237,.25)}
-.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
-.tab{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.08);
-  background:rgba(255,255,255,.05);color:#e5e7eb;white-space:nowrap;cursor:pointer}
-.tab.active{background:linear-gradient(135deg,#2563eb,#7c3aed);border-color:transparent;box-shadow:0 6px 18px rgba(124,58,237,.25)}
+.btn{background:linear-gradient(135deg,#2563eb,#7c3aed);border:0;color:#fff;
+  padding:9px 12px;border-radius:12px;font-weight:800;cursor:pointer;touch-action:manipulation}
+.btn-pill{border-radius:999px}
 .search{display:flex;gap:8px;background:rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:8px 10px}
-.search input{flex:1;background:transparent;border:0;color:var(--text);outline:0}
-.btn{background:linear-gradient(135deg,#2563eb,#7c3aed);border:0;color:#fff;
-  padding:9px 12px;border-radius:12px;font-weight:800;cursor:pointer}
-.btn-pill{border-radius:999px}
+.search input{flex:1;background:transparent;border:0;color:var(--text);outline:0;font-size:16px;line-height:1.4}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.tab{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.05);color:#e5e7eb;white-space:nowrap;cursor:pointer;touch-action:manipulation}
+.tab.active{background:linear-gradient(135deg,#2563eb,#7c3aed);border-color:transparent;box-shadow:0 6px 18px rgba(124,58,237,.25)}
 
-/* ===== Nút icon (trái tim sửa đẹp) ===== */
-.icon-btn{width:44px;height:44px;border-radius:50%;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.06);
-  display:grid;place-items:center;cursor:pointer}
-.icon{width:22px;height:22px;display:block}
-.icon-heart{fill:none;stroke:#ff6b81;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:.2s}
-.faved .icon-heart{fill:#ff4d6d;stroke:#ff4d6d}
-.icon-info{fill:none;stroke:#a8b3cf;stroke-width:2}
+/* ===== Chips / menu quick ===== */
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 2px}
+.chip{padding:8px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.06);cursor:pointer;touch-action:manipulation}
+.chip:hover{border-color:#7c3aed}
 
 /* ===== Hero ===== */
 .hero{position:relative;min-height:210px;padding:26px 0 6px;margin-bottom:6px}
@@ -93,7 +92,7 @@ body{
 .row{position:relative}
 .movie-row{display:flex;gap:14px;overflow-x:auto;padding:2px 2px 14px;scroll-behavior:smooth}
 .nav{position:absolute;top:calc(50% - 36px);width:44px;height:44px;display:grid;place-items:center;border-radius:50%;
-  border:1px solid rgba(255,255,255,.12);background:rgba(10,16,31,.6);cursor:pointer;z-index:5}
+  border:1px solid rgba(255,255,255,.12);background:rgba(10,16,31,.6);cursor:pointer;z-index:5;touch-action:manipulation}
 .nav.left{left:-6px}.nav.right{right:-6px}
 .nav:hover{transform:scale(1.06)}
 
@@ -110,11 +109,15 @@ body{
 .pills{display:flex;gap:6px;flex-wrap:wrap}
 .pill{font-size:11px;padding:3px 6px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1)}
 
-/* Chips */
-.chips{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 2px}
-.chip{padding:8px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.08);
-  background:rgba(255,255,255,.06);cursor:pointer}
-.chip:hover{border-color:#7c3aed}
+/* Rankings */
+.rank-wrap{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:900px){.rank-wrap{grid-template-columns:1fr 1fr}}
+.rank{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);border-radius:16px;padding:14px}
+.rank h3{margin:0 0 10px;font-size:18px}
+.rank ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.rank li{display:grid;grid-template-columns:auto auto 1fr;gap:10px;align-items:center}
+.rank .no{width:28px;height:28px;border-radius:8px;background:#1b233d;display:grid;place-items:center;font-weight:800;color:#9fb3ff}
+.rank img{width:38px;height:54px;border-radius:8px;object-fit:cover;border:1px solid rgba(255,255,255,.06)}
 
 /* Grid Explore/Search */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
@@ -126,8 +129,9 @@ body{
 @keyframes sh{to{transform:translateX(100%)}}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:#0b1220;border:1px solid #22304c;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 10px 24px rgba(0,0,0,.35);z-index:80}
 
-/* Popup */
-.popup{position:fixed;inset:0;display:none;justify-content:center;align-items:flex-start;background:rgba(0,0,0,.9);z-index:90;overflow:auto;padding:30px 12px}
+/* Popup (safe-area) */
+.popup{position:fixed;inset:0;display:none;justify-content:center;align-items:flex-start;background:rgba(0,0,0,.9);z-index:90;overflow:auto;
+  padding:calc(30px + env(safe-area-inset-top,0px)) 12px calc(30px + env(safe-area-inset-bottom,0px))}
 .popup-content{width:100%;max-width:1100px;display:flex;flex-direction:column;gap:12px}
 .player{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
 .player video,.player iframe{width:100%;height:100%;border:0;display:block}
@@ -140,11 +144,12 @@ body{
 .desc.exp{max-height:640px}
 .toggle{margin-top:10px;padding:8px 12px;background:#1d2542;border-radius:8px;border:1px solid rgba(255,255,255,.08);cursor:pointer}
 .eps{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
-.eps button{padding:8px;background:#151c36;border:1px solid rgba(255,255,255,.08);color:white;border-radius:8px;cursor:pointer;font-weight:800}
-.close{position:fixed;right:18px;top:18px;font-size:30px;color:white;cursor:pointer;z-index:95}
+.eps button{padding:8px;background:#151c36;border:1px solid rgba(255,255,255,.08);color:white;border-radius:8px;cursor:pointer;font-weight:800;touch-action:manipulation}
+.close{position:fixed;right:18px;top:calc(18px + env(safe-area-inset-top,0px));font-size:30px;color:white;cursor:pointer;z-index:95}
 
 /* Footer */
-footer{background:var(--panel);color:var(--muted);padding:24px 12px;border-top:1px solid rgba(255,255,255,.08);margin-top:36px;text-align:center}
+footer{background:var(--panel);color:var(--muted);padding:24px 12px calc(24px + env(safe-area-inset-bottom,0px));
+  border-top:1px solid rgba(255,255,255,.08);margin-top:36px;text-align:center}
 footer .footer-content{max-width:900px;margin:0 auto}
 footer a{color:#93c5fd}
 @media(max-width:640px){.movie{width:44.5vw;max-width:200px}.hero__poster{display:none}}
@@ -179,14 +184,13 @@ footer a{color:#93c5fd}
       <div class="hero__overlay"></div>
       <div class="hero__body">
         <div class="hero__poster"><img id="heroPoster" src="" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"></div>
-        <div style="flex:1">
+        <div>
           <h1 id="heroTitle">Đang tải...</h1>
           <div class="badges" id="heroBadges"></div>
           <div id="heroDesc" class="desc"></div>
-          <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+          <div style="margin-top:10px;display:flex;gap:8px">
             <button id="heroPlay" class="btn btn-pill">Xem ngay</button>
-            <button id="heroFav" class="icon-btn" title="Lưu"><svg class="icon icon-heart" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.3-8.6A5.5 5.5 0 0 1 12 6.2a5.5 5.5 0 0 1 9.3 6.2C19.5 16.4 12 21 12 21z"/></svg></button>
-            <button id="heroInfo" class="icon-btn" title="Chi tiết"><svg class="icon icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="12"></line><circle cx="12" cy="16" r="1.2" fill="#a8b3cf"></circle></svg></button>
+            <button id="heroSave" class="btn btn-pill" style="background:#1f2937">+ Lưu</button>
           </div>
         </div>
       </div>
@@ -203,6 +207,29 @@ footer a{color:#93c5fd}
     <button class="chip" data-key="Tâm lý">Tâm lý</button>
   </div>
 
+  <!-- Hàn / Trung / US-UK -->
+  <div class="sec"><h2>Phim Hàn Quốc mới</h2><a class="chip" data-go="quocgia-hq">Xem thêm ›</a></div>
+  <div class="row">
+    <button class="nav left" data-target="row-hq">‹</button>
+    <div id="row-hq" class="movie-row"></div>
+    <button class="nav right" data-target="row-hq">›</button>
+  </div>
+
+  <div class="sec"><h2>Phim Trung Quốc mới</h2><a class="chip" data-go="quocgia-tq">Xem thêm ›</a></div>
+  <div class="row">
+    <button class="nav left" data-target="row-tq">‹</button>
+    <div id="row-tq" class="movie-row"></div>
+    <button class="nav right" data-target="row-tq">›</button>
+  </div>
+
+  <div class="sec"><h2>Phim US-UK mới</h2><a class="chip" data-go="quocgia-usuk">Xem thêm ›</a></div>
+  <div class="row">
+    <button class="nav left" data-target="row-usuk">‹</button>
+    <div id="row-usuk" class="movie-row"></div>
+    <button class="nav right" data-target="row-usuk">›</button>
+  </div>
+
+  <!-- Hot rows -->
   <div class="sec"><h2>🔥 Phim Hot</h2></div>
   <div class="row">
     <button class="nav left" data-target="row-hot">‹</button>
@@ -210,25 +237,17 @@ footer a{color:#93c5fd}
     <button class="nav right" data-target="row-hot">›</button>
   </div>
 
-  <div class="sec"><h2>Phim Hàn Quốc mới</h2></div>
-  <div class="row">
-    <button class="nav left" data-target="row-hq">‹</button>
-    <div id="row-hq" class="movie-row"></div>
-    <button class="nav right" data-target="row-hq">›</button>
-  </div>
-
-  <div class="sec"><h2>Phim Trung Quốc mới</h2></div>
-  <div class="row">
-    <button class="nav left" data-target="row-tq">‹</button>
-    <div id="row-tq" class="movie-row"></div>
-    <button class="nav right" data-target="row-tq">›</button>
-  </div>
-
-  <div class="sec"><h2>Phim US-UK mới</h2></div>
-  <div class="row">
-    <button class="nav left" data-target="row-usuk">‹</button>
-    <div id="row-usuk" class="movie-row"></div>
-    <button class="nav right" data-target="row-usuk">›</button>
+  <!-- Rankings -->
+  <div class="sec"><h2>Bảng xếp hạng hôm nay</h2></div>
+  <div class="rank-wrap">
+    <div class="rank">
+      <h3>🎬 Sôi nổi nhất</h3>
+      <ul id="rank-trend"></ul>
+    </div>
+    <div class="rank">
+      <h3>💛 Yêu thích nhất</h3>
+      <ul id="rank-fav"></ul>
+    </div>
   </div>
 
   <div class="sec"><h2>🎞️ Phim bộ</h2></div>
@@ -276,7 +295,7 @@ footer a{color:#93c5fd}
         <div id="pDesc" class="desc"></div>
         <button id="pToggle" class="toggle" style="display:none">Xem thêm ▼</button>
         <div style="margin:10px 0;display:flex;gap:8px">
-          <button id="pSave" class="icon-btn" title="Lưu"><svg class="icon icon-heart" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.3-8.6A5.5 5.5 0 0 1 12 6.2a5.5 5.5 0 0 1 9.3 6.2C19.5 16.4 12 21 12 21z"/></svg></button>
+          <button id="pSave" class="btn btn-pill">+ Lưu</button>
           <button id="pReport" class="btn btn-pill" style="background:#1f2937">Báo lỗi</button>
           <button id="pShare" class="btn btn-pill" style="background:#1f2937">Chia sẻ</button>
         </div>
@@ -338,6 +357,24 @@ function card(movie, cdn){
 function fillRow(containerId, items, cdn){const el=document.getElementById(containerId);el.innerHTML='';items.forEach(m=>el.appendChild(card(m,cdn)))}
 function skeletonRow(containerId,n=10){const el=document.getElementById(containerId);el.innerHTML='';for(let i=0;i<n;i++){const d=document.createElement('div');d.className='movie';d.innerHTML='<div class="skeleton"></div>';el.appendChild(d)}}
 
+/* rankings */
+function renderRank(listEl, items, cdn){
+  listEl.innerHTML='';
+  items.slice(0,5).forEach((m,i)=>{
+    const img=imgChain(m.poster_url||m.thumb_url||'',cdn)[0];
+    const li=document.createElement('li');
+    li.innerHTML=`
+      <div class="no">${i+1}</div>
+      <img src="${img}" alt="">
+      <div>
+        <div style="font-weight:800">${m.name||m.origin_name||''}</div>
+        <div style="color:#9aa4b5;font-size:13px">${m.origin_name?m.origin_name:''} ${m.year?`• ${m.year}`:''}</div>
+      </div>`;
+    li.onclick=()=>openDetail(m.slug);
+    listEl.appendChild(li);
+  });
+}
+
 /* =================== Home data =================== */
 async function loadHome(){
   try{
@@ -346,11 +383,30 @@ async function loadHome(){
     let hot=null;for(const u of urls){try{hot=normList(await fetchJSON(u));break}catch{}}
     if(hot){fillRow('row-hot', hot.items.slice(0,12), hot.cdn);buildHero(hot.items[0],hot.cdn)}
 
+    // quốc gia
     loadBy(`${API_V1}/quoc-gia/han-quoc?page=1&limit=36`,'row-hq');
     loadBy(`${API_V1}/quoc-gia/trung-quoc?page=1&limit=36`,'row-tq');
     loadBy(`${API_V1}/quoc-gia/au-my?page=1&limit=36`,'row-usuk');
+
+    // list
     loadBy(`${API_V1}/danh-sach/phim-bo?page=1&limit=36`,'row-bo');
     loadBy(`${API_V1}/danh-sach/phim-le?page=1&limit=36`,'row-le');
+
+    // rankings
+    (async()=>{
+      try{
+        const t=normList(await fetchJSON(`${API_V1}/danh-sach/phim-bo?page=1&limit=36`));
+        renderRank($('#rank-trend'), t.items, t.cdn);
+      }catch{}
+      try{
+        const f=favList();
+        if(f && f.length){
+          renderRank($('#rank-fav'), f.map(x=>({slug:x.slug,name:x.name,origin_name:x.name,poster_url:x.poster,year:x.year})), 'https://phimimg.com');
+        }else if(hot){
+          renderRank($('#rank-fav'), hot.items, hot.cdn);
+        }
+      }catch{}
+    })();
   }catch(e){toast('Lỗi tải trang chủ')}
 }
 async function loadBy(url, cid){try{const d=normList(await fetchJSON(url));fillRow(cid,d.items,d.cdn)}catch{}}
@@ -363,9 +419,7 @@ function buildHero(m,cdn){
   $('#heroBadges').innerHTML=b.join('');
   $('#heroDesc').textContent=m.content || m.description || '...';
   $('#heroPlay').onclick=()=>openDetail(m.slug);
-  $('#heroInfo').onclick=()=>openDetail(m.slug);
-  $('#heroFav').onclick=()=>toggleFav(m,true);
-  reflectFavUI(m.slug); // cập nhật trạng thái icon
+  $('#heroSave').onclick=()=>toggleFav(m);
 }
 
 /* =================== Explore/Search =================== */
@@ -382,6 +436,14 @@ $('#tabs').addEventListener('click',e=>{
   if(view==='explore'){exploreType=t.dataset.type;startExplore(exploreType,'Khám phá: '+t.textContent);return}
   if(view==='fav'){renderFav();setView('fav');return}
   if(view==='his'){renderHistory();setView('his');return}
+});
+document.querySelectorAll('.chip[data-go]').forEach(c=>{
+  c.onclick=()=>{
+    const v=c.dataset.go;
+    if(v==='quocgia-hq') startExplore('han-quoc','Khám phá: Hàn Quốc');
+    else if(v==='quocgia-tq') startExplore('trung-quoc','Khám phá: Trung Quốc');
+    else if(v==='quocgia-usuk') startExplore('au-my','Khám phá: US-UK');
+  };
 });
 document.querySelectorAll('.chip[data-key]').forEach(c=>c.onclick=()=>{const k=c.dataset.key;startExplore(k,`Kết quả: “${k}”`);location.hash='#search='+encodeURIComponent(k)})
 
@@ -443,11 +505,11 @@ async function openDetail(slug){
     if(desc.length>220){tg.style.display='inline-block';tg.textContent='Xem thêm ▼';tg.onclick=()=>{const ex=el.classList.toggle('exp');tg.textContent=ex?'Thu gọn':'Xem thêm ▼'} } else tg.style.display='none';
     const eps=(d.episodes||[]).flatMap(sv=>(sv.server_data||[]).map((ep,i)=>({name:ep.name||`Tập ${i+1}`,embed:ep.link_embed,m3u8:ep.link_m3u8})));
     const wrap=$('#eps'); wrap.innerHTML=''; eps.forEach(ep=>{const b=document.createElement('button');b.textContent=ep.name; b.onclick=()=>play(ep); wrap.appendChild(b)});
-    $('#pSave').onclick=()=>toggleFav(m,true);
+    $('#pSave').onclick=()=>toggleFav(m);
     $('#pReport').onclick=()=>{prompt('Mô tả lỗi phát (copy link này gửi cho admin):', location.href)};
     $('#pShare').onclick=()=>{navigator.clipboard?.writeText(location.href); toast('Đã sao chép link')};
     openPopup(); if(eps[0]) play(eps[0]);
-    addHistory(m); reflectFavUI(m.slug);
+    addHistory(m);
   }catch{toast('Lỗi tải chi tiết')}
 }
 function openPopup(){ $('#popup').style.display='flex'; window.scrollTo({top:0,behavior:'smooth'}) }
@@ -473,18 +535,8 @@ function lsGet(k,def){try{return JSON.parse(localStorage.getItem(k)||def)}catch{
 function lsSet(k,v){localStorage.setItem(k, JSON.stringify(v))}
 function favList(){return lsGet('fav','[]')}
 function isFav(slug){return favList().some(x=>x.slug===slug)}
-function toggleFav(m,showToast=false){
-  let f=favList();
-  if(isFav(m.slug)){f=f.filter(x=>x.slug!==m.slug); if(showToast) toast('Đã xoá khỏi Yêu thích')}
-  else{f.unshift({slug:m.slug,name:m.name||m.origin_name,poster:m.poster_url||m.thumb_url,year:m.year,lang:m.lang}); if(showToast) toast('Đã lưu Yêu thích')}
-  lsSet('fav',f); renderFav(); reflectFavUI(m.slug);
-}
-function reflectFavUI(slug){
-  const is=isFav(slug);
-  $('#heroFav')?.classList.toggle('faved',is);
-  $('#pSave')?.classList.toggle('faved',is);
-}
-function renderFav(){const grid=$('#favGrid'); if(!grid) return; grid.innerHTML=''; favList().forEach(x=>{const div=card(x,'https://phimimg.com'); grid.appendChild(div)}); if(!favList().length) grid.innerHTML='<p style="color:#9aa4b5">Chưa có mục yêu thích nào.</p>'}
+function toggleFav(m){let f=favList(); if(isFav(m.slug)){f=f.filter(x=>x.slug!==m.slug); toast('Đã xoá khỏi Yêu thích')}else{f.unshift({slug:m.slug,name:m.name||m.origin_name,poster:m.poster_url||m.thumb_url,year:m.year,lang:m.lang}); toast('Đã lưu Yêu thích')} lsSet('fav',f); renderFav()}
+function renderFav(){const grid=$('#favGrid'); grid.innerHTML=''; favList().forEach(x=>{const div=card(x,'https://phimimg.com'); grid.appendChild(div)}); if(!favList().length) grid.innerHTML='<p style="color:#9aa4b5">Chưa có mục yêu thích nào.</p>'}
 function hisList(){return lsGet('his','[]')}
 function addHistory(m){let h=hisList().filter(x=>x.slug!==m.slug); h.unshift({slug:m.slug,name:m.name||m.origin_name,poster:m.poster_url||m.thumb_url,year:m.year,lang:m.lang}); h=h.slice(0,60); lsSet('his',h)}
 function renderHistory(){const grid=$('#hisGrid'); grid.innerHTML=''; hisList().forEach(x=>grid.appendChild(card(x,'https://phimimg.com'))); if(!hisList().length) grid.innerHTML='<p style="color:#9aa4b5">Chưa có lịch sử xem.</p>'}
@@ -500,4 +552,3 @@ loadHome();
 </script>
 </body>
 </html>
-
