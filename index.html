@@ -109,7 +109,7 @@ input,button,select,textarea{font:inherit;-webkit-appearance:none}
 .hero h1{margin:4px 0 6px;font-size:22px;font-weight:800}
 .hero .desc{color:#d0d6e5;max-height:70px;overflow:hidden}
 
-/* hero CTA tròn (SVG icons để tránh emoji iOS) */
+/* hero CTA tròn (SVG icons) */
 .hero-cta{display:flex;gap:12px;margin-top:12px}
 .cbtn{width:58px;height:58px;border-radius:999px;display:grid;place-items:center;
   border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);
@@ -1064,7 +1064,7 @@ function exploreCandidates(page){
     if(['anime','hoat-hinh'].includes(slug)){
       urls.push(`${API_V1}/the-loai/hoat-hinh?page=${page}&limit=36`);
       urls.push(`${API_V1}/the-loai/anime?page=${page}&limit=36`);
-      urls.push(`${API_V1}/danh-sach/hoat-hinh?page=${page}&limit=36`);
+      urls.push(`${API_V1}/danh-sach/hoat-hinh?page=${page}&limit=36}`);
     }
     return urls;
   }
@@ -1396,7 +1396,7 @@ window.addEventListener('hashchange',()=>{
   else if(h.startsWith('#search=')){ const kw=decodeURIComponent(h.split('=')[1]||''); $('#q').value=kw; startExplore(kw,`Kết quả: “${kw}”`) }
 });
 
-/* =============== Ads lazy render =============== */
+/* =============== Ads lazy render + demo banners =============== */
 function renderAdPlaceholder(el, text='Quảng cáo'){
   el.innerHTML = `<div class="ad-label">Quảng cáo</div><div class="placeholder">${text}</div>`;
 }
@@ -1408,6 +1408,9 @@ function mountAd(el, html, placeholderText){
     renderAdPlaceholder(el, placeholderText);
   }
 }
+/* nhỏ gọn: log demo impression/click */
+function trackAd(slot, type){ try{ console.debug('[AD]', type, slot); }catch{} }
+
 function queueAd(id, placeholderText){
   const el = document.getElementById(id);
   if(!el) return;
@@ -1417,11 +1420,18 @@ function queueAd(id, placeholderText){
         observer.unobserve(el);
         const code = (AD_CONFIG.slots && AD_CONFIG.slots[id]) || '';
         mountAd(el, code, placeholderText);
+        trackAd(id,'impression');
       }
     });
   },{rootMargin:'600px'});
   obs.observe(el);
 }
+/* Bắt click trên các banner có data-ad-slot */
+document.addEventListener('click',e=>{
+  const a=e.target.closest('a[data-ad-slot]');
+  if(a){ trackAd(a.dataset.adSlot,'click'); }
+});
+
 function initStickyAd(){
   if(!AD_CONFIG.enabled) return;
   if(window.matchMedia('(min-width:1024px)').matches) return; // mobile only
@@ -1432,18 +1442,63 @@ function initStickyAd(){
   setTimeout(()=>{
     if(code && code.trim()){ inner.innerHTML=code; } else { inner.innerHTML='<div class="placeholder">Sticky 320×50 / 320×100</div>'; }
     el.style.display='block';
+    trackAd('adSticky','impression');
   }, 2600);
   $('#adStickyClose').onclick=()=>{ el.style.display='none'; localStorage.setItem('adStickyClosed','1'); };
 }
 
-/* ==== AD CONFIG ==== */
+/* ==== AD CONFIG (đổi nội dung trong slots để test/triển khai thật) ==== */
 const AD_CONFIG = {
   enabled: true,
   slots: {
-    adTopBillboard: ``,
-    adMidHome: ``,
-    adPlayer: ``,
-    adSticky: ``
+    /* Billboard trên cùng (desktop): responsive, min-height ~ 250 */
+    adTopBillboard: `
+      <a data-ad-slot="adTopBillboard"
+         href="https://example.com/?utm_source=thanphat&utm_medium=billboard&utm_campaign=demo"
+         target="_blank" rel="nofollow noopener"
+         style="display:grid;place-items:center;min-height:250px;text-align:center;
+                background:linear-gradient(120deg,#1e3a8a,#9333ea);
+                color:#fff;font-weight:900;font-size:28px;text-decoration:none;">
+        DEMO BILLBOARD 970×250<br>
+        <span style="font-weight:600;font-size:14px;opacity:.9">Nhấp để kiểm tra click (console)</span>
+      </a>
+    `,
+
+    /* In-page giữa trang */
+    adMidHome: `
+      <a data-ad-slot="adMidHome"
+         href="https://example.com/?utm_source=thanphat&utm_medium=inpage&utm_campaign=demo"
+         target="_blank" rel="nofollow noopener"
+         style="display:grid;place-items:center;min-height:90px;text-align:center;
+                background:linear-gradient(120deg,#0ea5e9,#22c55e);
+                color:#0b132b;font-weight:900;font-size:20px;text-decoration:none;">
+        DEMO IN-PAGE 728×90
+      </a>
+    `,
+
+    /* Banner dưới player */
+    adPlayer: `
+      <a data-ad-slot="adPlayer"
+         href="https://example.com/?utm_source=thanphat&utm_medium=below_player&utm_campaign=demo"
+         target="_blank" rel="nofollow noopener"
+         style="display:grid;place-items:center;min-height:90px;text-align:center;
+                background:linear-gradient(120deg,#f59e0b,#ef4444);
+                color:#111827;font-weight:900;font-size:20px;text-decoration:none;">
+        DEMO BELOW-PLAYER 728×90
+      </a>
+    `,
+
+    /* Sticky chỉ hiện trên mobile, có nút đóng riêng bên ngoài */
+    adSticky: `
+      <a data-ad-slot="adSticky"
+         href="https://example.com/?utm_source=thanphat&utm_medium=sticky&utm_campaign=demo"
+         target="_blank" rel="nofollow noopener"
+         style="display:grid;place-items:center;min-height:100px;text-align:center;
+                background:linear-gradient(120deg,#06b6d4,#a78bfa);
+                color:#0b132b;font-weight:900;font-size:18px;text-decoration:none;border-radius:8px;">
+        DEMO STICKY 320×100 (Mobile)
+      </a>
+    `
   }
 };
 
@@ -1460,5 +1515,4 @@ loadHome();
 initAds();
 </script>
 </body>
-  </html>
-
+</html>
