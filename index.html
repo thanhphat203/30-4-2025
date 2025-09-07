@@ -6,19 +6,25 @@
 <title>THANHPHAT • Phim hay mượt như app</title>
 <meta name="description" content="Duyệt & xem thông tin phim mượt. Dữ liệu từ phimapi.com." />
 <meta name="theme-color" content="#0b1020" />
+
+<!-- Prefetch/Preconnect -->
 <link rel="dns-prefetch" href="https://phimapi.com">
 <link rel="dns-prefetch" href="https://phimimg.com">
 <link rel="preconnect" href="https://phimapi.com" crossorigin>
 <link rel="preconnect" href="https://phimimg.com" crossorigin>
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<link rel="preconnect" href="https://images.weserv.nl" crossorigin>
+
+<!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
 <style>
 :root{
   --bg:#0b1020;--panel:#11172c;--panel2:#0e152b;--ring:#2563eb;
   --accent:#e50914;--accent2:#7c3aed;--text:#f5f7fb;--muted:#97a2b3;
-  --hdr-h:68px;
+  --hdr-h:68px;--container:1280px;
+  --glow1:#60a5fa;--glow2:#a78bfa;--glass:rgba(255,255,255,.08);
 }
 @media(max-width:640px){:root{--hdr-h:72px}}
 *{box-sizing:border-box}
@@ -26,23 +32,23 @@ html,body{height:100%}
 html{-webkit-text-size-adjust:100%;scroll-padding-top:calc(var(--hdr-h) + env(safe-area-inset-top,0px))}
 body{
   margin:0;color:var(--text);
+  -webkit-tap-highlight-color: transparent;
   font-family:"Plus Jakarta Sans",system-ui,Segoe UI,Roboto,Arial,sans-serif;
   background:
     radial-gradient(900px 600px at 50% -200px, rgba(59,130,246,.25), transparent 60%),
     linear-gradient(180deg, rgba(2,6,23,.85), rgba(2,6,23,0)),
     var(--bg);
-  /* tránh header đè, an toàn tai thỏ */
   padding-top:calc(var(--hdr-h) + env(safe-area-inset-top,0px));
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
 a{color:inherit;text-decoration:none}
-input,button,textarea,select{font:inherit}
-.container{max-width:1160px;margin:0 auto;padding:0 12px}
+input,button,select,textarea{font:inherit;-webkit-appearance:none}
+.container{max-width:var(--container);margin:0 auto;padding:0 14px}
 
-/* ===== Header (fixed, safe-area) ===== */
+/* ===== Header ===== */
 .hdr{
-  position:fixed;top:0;left:0;right:0;z-index:1000;
-  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  position:fixed;inset:0 0 auto 0;z-index:1000;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   background:linear-gradient(180deg,rgba(7,11,24,.92),rgba(7,11,24,.6));
   border-bottom:1px solid rgba(255,255,255,.06);
   padding-top:env(safe-area-inset-top,0px);
@@ -55,50 +61,108 @@ input,button,textarea,select{font:inherit}
 .brand__t{font-family:"Cinzel",serif;font-weight:800;letter-spacing:.5px;
   background:linear-gradient(90deg,#c7d2fe,#f0abfc);
   -webkit-background-clip:text;background-clip:text;color:transparent;
-  text-shadow:0 0 16px rgba(124,58,237,.25)}
+  text-shadow:0 0 16px rgba(124,58,237,.25);cursor:pointer;user-select:none}
 .btn{background:linear-gradient(135deg,#2563eb,#7c3aed);border:0;color:#fff;
   padding:9px 12px;border-radius:12px;font-weight:800;cursor:pointer;touch-action:manipulation}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
 .btn-pill{border-radius:999px}
-.search{display:flex;gap:8px;background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:8px 10px}
+.btn-ghost{background:#0f172a;border:1px solid rgba(255,255,255,.12);color:#e5e7eb}
+.search{position:relative;display:flex;gap:8px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:8px 10px;min-width:220px}
 .search input{flex:1;background:transparent;border:0;color:var(--text);outline:0;font-size:16px;line-height:1.4}
-.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
 .tab{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.08);
   background:rgba(255,255,255,.05);color:#e5e7eb;white-space:nowrap;cursor:pointer;touch-action:manipulation}
 .tab.active{background:linear-gradient(135deg,#2563eb,#7c3aed);border-color:transparent;box-shadow:0 6px 18px rgba(124,58,237,.25)}
 
-/* ===== Chips / menu quick ===== */
+/* ===== Chips ===== */
 .chips{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 2px}
 .chip{padding:8px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.08);
   background:rgba(255,255,255,.06);cursor:pointer;touch-action:manipulation}
 .chip:hover{border-color:#7c3aed}
 
 /* ===== Hero ===== */
-.hero{position:relative;min-height:210px;padding:26px 0 6px;margin-bottom:6px}
-.hero__card{position:relative;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.06);background:#0b1224}
-.hero__bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(14px) saturate(1.2);transform:scale(1.12);opacity:.45}
-.hero__overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,12,28,.92),rgba(8,12,28,.72),rgba(8,12,28,.2))}
-.hero__body{position:relative;display:flex;gap:16px;padding:16px}
-.hero__poster{width:140px;border-radius:14px;overflow:hidden;flex:0 0 auto;background:#0e1426;border:1px solid rgba(255,255,255,.06)}
-.hero__poster img{width:100%;height:210px;object-fit:cover;display:block}
-.badges{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.hero{position:relative;min-height:220px;padding:22px 0 0;margin-bottom:2px}
+.hero__card{
+  position:relative;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.06);
+  background:#0b1224;isolation:isolate;
+}
+.hero__bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(18px) saturate(1.15);transform:scale(1.12);opacity:.45}
+.hero__overlay{position:absolute;inset:0;background:
+  radial-gradient(1200px 400px at -5% -20%, rgba(96,165,250,.20), transparent 60%),
+  radial-gradient(900px 420px at 110% 100%, rgba(167,139,250,.18), transparent 60%),
+  linear-gradient(90deg,rgba(8,12,28,.94),rgba(8,12,28,.72),rgba(8,12,28,.25))}
+.hero__card::after{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.17;
+  background:
+    radial-gradient(ellipse at 70% -60%, rgba(255,255,255,.08), transparent 35%),
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.20"/></svg>');
+  mix-blend-mode:soft-light
+}
+.hero__body{position:relative;display:flex;gap:16px;padding:18px}
+.hero__poster{width:150px;border-radius:14px;overflow:hidden;flex:0 0 auto;background:#0e1426;border:1px solid rgba(255,255,255,.06)}
+.hero__poster img{width:100%;height:220px;object-fit:cover;display:block}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 6px}
 .badge{font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.12)}
-.hero h1{margin:4px 0 6px;font-size:20px;font-weight:800}
-.hero .desc{color:#d0d6e5;max-height:66px;overflow:hidden}
+.hero h1{margin:4px 0 6px;font-size:22px;font-weight:800}
+.hero .desc{color:#d0d6e5;max-height:70px;overflow:hidden}
 
-/* ===== Sections ===== */
-.sec{display:flex;align-items:center;justify-content:space-between;margin:14px 2px 8px}
+/* hero CTA tròn (SVG icons để tránh emoji iOS) */
+.hero-cta{display:flex;gap:12px;margin-top:12px}
+.cbtn{width:58px;height:58px;border-radius:999px;display:grid;place-items:center;
+  border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer;touch-action:manipulation}
+.cbtn svg{width:26px;height:26px;display:block;fill:currentColor}
+.cbtn.play{background:linear-gradient(135deg,#f59e0b,#fde68a);color:#111827;border:0;font-weight:900}
+
+/* dải thumbnail dưới hero */
+.hero__strip{
+  position:absolute;left:16px;right:16px;bottom:10px;
+  display:flex;gap:10px;overflow:auto;padding:8px 4px 6px;margin:0 -4px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch
+}
+.hero__strip::-webkit-scrollbar{display:none}
+.hthumb{flex:0 0 auto;width:70px}
+.hthumb .box{position:relative;border-radius:12px;overflow:hidden;background:#0e1426;border:1px solid rgba(255,255,255,.06)}
+.hthumb img{display:block;width:70px;height:98px;object-fit:cover}
+.hthumb.active .box{outline:2px solid #93c5fd}
+
+/* ===== Sections & Rows ===== */
+.sec{display:flex;align-items:center;justify-content:space-between;margin:16px 2px 10px}
 .sec h2{font-size:20px;margin:0;color:#dbeafe;text-shadow:0 2px 14px rgba(59,130,246,.25)}
 .row{position:relative}
-.movie-row{display:flex;gap:14px;overflow-x:auto;padding:2px 2px 14px;scroll-behavior:smooth}
-.nav{position:absolute;top:calc(50% - 36px);width:44px;height:44px;display:grid;place-items:center;border-radius:50%;
-  border:1px solid rgba(255,255,255,.12);background:rgba(10,16,31,.6);cursor:pointer;z-index:5;touch-action:manipulation}
-.nav.left{left:-6px}.nav.right{right:-6px}
-.nav:hover{transform:scale(1.06)}
 
-.movie{width:176px;flex:0 0 auto;cursor:pointer;perspective:700px}
+.movie-row{
+  display:flex;gap:14px;overflow-x:auto;scroll-behavior:smooth;
+  padding:2px 2px 26px;
+  -ms-overflow-style:none;scrollbar-width:none;
+  touch-action: pan-y;-webkit-overflow-scrolling:touch
+}
+.movie-row::-webkit-scrollbar{height:0}
+.row::before,.row::after{
+  content:"";position:absolute;top:0;bottom:22px;width:70px;pointer-events:none;z-index:1
+}
+.row::before{left:0;background:linear-gradient(90deg, rgba(11,16,32,1), rgba(11,16,32,0))}
+.row::after{right:0;background:linear-gradient(270deg, rgba(11,16,32,1), rgba(11,16,32,0))}
+
+/* Nút mũi tên */
+.row .arrow{
+  position:absolute;top:40%;transform:translateY(-50%);z-index:3;
+  width:40px;height:40px;border-radius:999px;display:grid;place-items:center;
+  background:rgba(15,23,42,.65);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  cursor:pointer;opacity:0;transition:.25s;touch-action:manipulation
+}
+.row:hover .arrow{opacity:1}
+.row .arrow.left{left:8px}
+.row .arrow.right{right:8px}
+
+/* Card */
+.movie{width:176px;flex:0 0 auto;cursor:pointer;perspective:700px;outline:none}
+.movie:focus-visible{box-shadow:0 0 0 3px rgba(96,165,250,.55);border-radius:16px}
 .poster{position:relative;height:0;padding-top:150%;border-radius:16px;overflow:hidden;background:#0e1426;border:1px solid rgba(255,255,255,.06);
-  transform:perspective(700px) rotateX(var(--rx,0)) rotateY(var(--ry,0))}
+  transform:perspective(700px) rotateX(var(--rx,0)) rotateY(var(--ry,0)); will-change:transform}
 .poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .shine::after{content:"";position:absolute;inset:-130% -50% auto auto;width:60%;height:220%;transform:rotate(25deg);opacity:0;
   background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);transition:transform .4s ease,opacity .4s ease}
@@ -109,13 +173,60 @@ input,button,textarea,select{font:inherit}
 .pills{display:flex;gap:6px;flex-wrap:wrap}
 .pill{font-size:11px;padding:3px 6px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1)}
 
+/* ===== Anime Vault ===== */
+.av-sec .hdrline{display:flex;align-items:center;gap:10px;margin:18px 2px 12px}
+.av-sec .hdrline h2{font-size:22px;margin:0}
+.av-sec .go{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);font-weight:800}
+
+.anivault{
+  position:relative;border-radius:20px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+  background:#0b1224;min-height:360px;isolation:isolate;
+}
+.anivault .bg{position:absolute;inset:0;background-size:cover;background-position:right center;filter:contrast(1.05) saturate(1.1);opacity:.52;transform:scale(1.08)}
+.anivault .overlay{position:absolute;inset:0;
+  background:
+    radial-gradient(1200px 400px at -5% -20%, rgba(96,165,250,.18), transparent 60%),
+    radial-gradient(900px 420px at 110% 100%, rgba(167,139,250,.16), transparent 60%),
+    linear-gradient(90deg,rgba(8,12,28,.96) 0 44%, rgba(8,12,28,.72) 60%, rgba(8,12,28,.15) 82%)}
+.anivault::after{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.15;
+  background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.25"/></svg>');
+  mix-blend-mode:soft-light
+}
+.anivault .inner{position:relative;display:grid;grid-template-columns:1fr;gap:12px;padding:22px}
+.av-title{font-size:28px;font-weight:800;margin:0}
+.av-sub{color:#cfd6e6;margin-top:-6px}
+.av-badges,.av-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.badge2{font-size:12px;font-weight:800;padding:5px 9px;border-radius:10px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+.tag{font-size:12px;padding:5px 9px;border-radius:999px;background:#121a36;border:1px solid rgba(255,255,255,.08)}
+.av-desc{color:#dde4f7;max-width:720px;line-height:1.65;margin-top:8px}
+.av-cta{display:flex;gap:14px;margin-top:14px}
+.av-cta .cbtn{width:64px;height:64px}
+.av-strip{display:flex;gap:10px;overflow:auto;padding:10px 4px 16px;margin:8px -4px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.av-strip::-webkit-scrollbar{display:none}
+.av-thumb{flex:0 0 auto;width:82px}
+.av-thumb .box{position:relative;border-radius:12px;overflow:hidden;background:#0e1426;border:1px solid rgba(255,255,255,.06)}
+.av-thumb img{display:block;width:82px;height:116px;object-fit:cover}
+.av-thumb.active .box{outline:2px solid #93c5fd}
+.av-thumb .cap{position:absolute;inset:auto 6px 6px 6px;font-size:11px;background:rgba(0,0,0,.6);padding:2px 6px;border-radius:8px;display:inline-block}
+
+@media(max-width:740px){
+  .av-title{font-size:22px}
+  .anivault{min-height:320px}
+  .hero__poster{display:none}
+}
+
 /* Rankings */
 .rank-wrap{display:grid;grid-template-columns:1fr;gap:12px}
 @media(min-width:900px){.rank-wrap{grid-template-columns:1fr 1fr}}
 .rank{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);border-radius:16px;padding:14px}
 .rank h3{margin:0 0 10px;font-size:18px}
 .rank ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-.rank li{display:grid;grid-template-columns:auto auto 1fr;gap:10px;align-items:center}
+.rank li{display:grid;grid-template-columns:auto auto 1fr;gap:10px;align-items:center;padding:6px;border-radius:10px;cursor:pointer}
+.rank li:hover{background:rgba(255,255,255,.04)}
 .rank .no{width:28px;height:28px;border-radius:8px;background:#1b233d;display:grid;place-items:center;font-weight:800;color:#9fb3ff}
 .rank img{width:38px;height:54px;border-radius:8px;object-fit:cover;border:1px solid rgba(255,255,255,.06)}
 
@@ -123,20 +234,37 @@ input,button,textarea,select{font:inherit}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
 #explore{padding-bottom:22px}
 
-/* Skeleton */
+/* Explore filter bar */
+#filterBar{margin:6px 2px 12px}
+#filterBar .label{opacity:.9;margin-right:6px}
+#filterBar .btn-clear{margin-left:8px}
+
+/* ===== Ads ===== */
+.ad-slot{position:relative;display:block;margin:14px 0;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
+.ad-slot .ad-label{position:absolute;top:6px;left:8px;font-size:11px;color:#9aa4b5;background:rgba(0,0,0,.45);padding:3px 6px;border-radius:6px;border:1px solid rgba(255,255,255,.1)}
+.ad-slot .placeholder{display:grid;place-items:center;min-height:120px;color:#9aa4b5}
+.ad-slot iframe, .ad-slot img{display:block;width:100%;height:auto}
+.ad-sticky{position:fixed;left:10px;right:10px;bottom:10px;z-index:9998;background:#0f172a;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:6px;box-shadow:0 10px 24px rgba(0,0,0,.35)}
+.ad-close{position:absolute;right:6px;top:6px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);color:#e5e7eb;border-radius:8px;padding:2px 6px;cursor:pointer}
+@media(min-width:1024px){ .ad-sticky{display:none} }
+
+/* Skeleton & toast */
 .skeleton{position:relative;overflow:hidden;background:#0f162b;border-radius:16px;height:0;padding-top:150%}
 .skeleton::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);transform:translateX(-100%);animation:sh 1.4s infinite}
 @keyframes sh{to{transform:translateX(100%)}}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:#0b1220;border:1px solid #22304c;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 10px 24px rgba(0,0,0,.35);z-index:80}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:#0b1220;border:1px solid #22304c;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 10px 24px rgba(0,0,0,.35);z-index:99999}
 
-/* Popup (safe-area) */
-.popup{position:fixed;inset:0;display:none;justify-content:center;align-items:flex-start;background:rgba(0,0,0,.9);z-index:90;overflow:auto;
+/* Popup & Player */
+.popup{position:fixed;inset:0;display:none;justify-content:center;align-items:flex-start;background:rgba(0,0,0,.9);z-index:9990;overflow:auto;
   padding:calc(30px + env(safe-area-inset-top,0px)) 12px calc(30px + env(safe-area-inset-bottom,0px))}
-.popup-content{width:100%;max-width:1100px;display:flex;flex-direction:column;gap:12px}
-.player{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+.popup-content{width:100%;max-width:1180px;display:flex;flex-direction:column;gap:12px}
+.player{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
 .player video,.player iframe{width:100%;height:100%;border:0;display:block}
+.player .loading{position:absolute;inset:0;display:none;place-items:center;background:rgba(0,0,0,.18);backdrop-filter:blur(1px)}
+.player .loading::after{content:"";width:38px;height:38px;border-radius:50%;border:4px solid rgba(255,255,255,.25);border-top-color:#fff;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
 .pb{display:flex;gap:18px;flex-wrap:wrap;padding:8px}
-.pb img{width:240px;border-radius:12px;object-fit:cover}
 .pi{flex:1;min-width:260px}
 .pi h3{margin:0 0 6px;font-size:24px;font-family:"Cinzel",serif}
 .pi .m{color:var(--muted);font-size:14px;line-height:1.5}
@@ -144,23 +272,58 @@ input,button,textarea,select{font:inherit}
 .desc.exp{max-height:640px}
 .toggle{margin-top:10px;padding:8px 12px;background:#1d2542;border-radius:8px;border:1px solid rgba(255,255,255,.08);cursor:pointer}
 .eps{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
-.eps button{padding:8px;background:#151c36;border:1px solid rgba(255,255,255,.08);color:white;border-radius:8px;cursor:pointer;font-weight:800;touch-action:manipulation}
-.close{position:fixed;right:18px;top:calc(18px + env(safe-area-inset-top,0px));font-size:30px;color:white;cursor:pointer;z-index:95}
+.eps button{padding:8px;background:#151c36;border:1px solid rgba(255,255,255,.08);color:white;border-radius:8px;cursor:pointer;font-weight:800}
+.eps button.sel{outline:2px solid #60a5fa;background:#0b1430}
+
+/* Cast */
+.cast{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.cast .person{padding:6px 10px;border-radius:999px;background:#121a36;border:1px solid rgba(255,255,255,.08);font-size:13px}
+
+/* Close button */
+.close{position:fixed;right:16px;top:calc(16px + env(safe-area-inset-top,0px));width:42px;height:42px;display:grid;place-items:center;border-radius:50%;
+  background:rgba(15,23,42,.75);color:#fff;font-size:22px;border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);cursor:pointer;z-index:10000}
+.close:hover{transform:scale(1.04)}
+
+/* Detail header */
+.detail-hero{border:1px solid rgba(255,255,255,.06);border-radius:14px;overflow:hidden;background:#0b1220;position:relative}
+.detail-hero .bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(16px) saturate(1.1);opacity:.35;transform:scale(1.08)}
+.detail-hero .overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,12,28,.92),rgba(8,12,28,.72),rgba(8,12,28,.2))}
+.detail-hero .inner{position:relative;display:flex;gap:16px;padding:16px;align-items:center}
+.detail-hero img{width:140px;height:210px;object-fit:cover;border-radius:12px;border:1px solid rgba(255,255,255,.06)}
+.detail-title{margin:0 0 6px;font-size:22px;font-weight:800}
+.detail-meta{color:#b7c0d4;font-size:14px;line-height:1.5}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#0f172a;border:1px solid rgba(255,255,255,.08);padding:8px 10px;border-radius:10px}
+.toolbar select,.toolbar label,.toolbar button{font:inherit}
+.sel{background:#0b1430}
+.toolbar select{background:#0b1430;border:1px solid rgba(255,255,255,.12);color:#e5e7eb;border-radius:8px;padding:8px 10px;min-width:120px}
+.toolbar .sep{width:1px;height:24px;background:rgba(255,255,255,.1);margin:0 4px}
 
 /* Footer */
-footer{background:var(--panel);color:var(--muted);padding:24px 12px calc(24px + env(safe-area-inset-bottom,0px));
-  border-top:1px solid rgba(255,255,255,.08);margin-top:36px;text-align:center}
+footer{background:var(--panel);color:var(--muted);padding:24px 12px calc(24px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(255,255,255,.08);margin-top:36px;text-align:center}
 footer .footer-content{max-width:900px;margin:0 auto}
 footer a{color:#93c5fd}
-@media(max-width:640px){.movie{width:44.5vw;max-width:200px}.hero__poster{display:none}}
+
+/* Footer badge */
+.footer-badge{display:inline-flex;align-items:center;gap:10px;margin-top:12px;padding:8px 14px;border-radius:999px;background:linear-gradient(180deg,#b91c1c,#7f1d1d);color:#fff;border:1px solid rgba(255,255,255,.12);box-shadow:0 6px 18px rgba(239,68,68,.28);font-weight:800}
+.footer-badge .star{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;background:#facc15;color:#7c2d12;font-size:12px;line-height:1}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce){
+  .movie:hover .poster{transform:none}
+  .shine::after{display:none}
+}
 </style>
 </head>
 <body>
 
 <header class="hdr">
   <div class="hdr__row container">
-    <div class="brand"><div class="brand__t">THANHPHAT</div></div>
-    <nav class="tabs" id="tabs">
+    <div class="brand">
+      <div id="homeBtn" class="brand__t" title="Về Trang chủ">🏠PHIM MỚI</div>
+    </div>
+    <nav class="tabs" id="tabs" aria-label="Điều hướng">
       <button class="tab active" data-view="home">Trang chủ</button>
       <button class="tab" data-type="phim-le" data-view="explore">Phim lẻ</button>
       <button class="tab" data-type="phim-bo" data-view="explore">Phim bộ</button>
@@ -169,7 +332,7 @@ footer a{color:#93c5fd}
       <button class="tab" data-view="fav">Yêu thích</button>
       <button class="tab" data-view="his">Lịch sử</button>
     </nav>
-    <div class="search">
+    <div class="search" role="search">
       <input id="q" placeholder="Tìm phim... (ấn / để focus)" aria-label="Tìm phim">
       <button id="btnSearch" class="btn btn-pill">Tìm</button>
     </div>
@@ -183,21 +346,29 @@ footer a{color:#93c5fd}
       <div id="heroBg" class="hero__bg" aria-hidden="true"></div>
       <div class="hero__overlay"></div>
       <div class="hero__body">
-        <div class="hero__poster"><img id="heroPoster" src="" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"></div>
+        <div class="hero__poster"><img id="heroPoster" src="" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" fetchpriority="high"></div>
         <div>
           <h1 id="heroTitle">Đang tải...</h1>
           <div class="badges" id="heroBadges"></div>
           <div id="heroDesc" class="desc"></div>
-          <div style="margin-top:10px;display:flex;gap:8px">
-            <button id="heroPlay" class="btn btn-pill">Xem ngay</button>
-            <button id="heroSave" class="btn btn-pill" style="background:#1f2937">+ Lưu</button>
+          <div class="hero-cta">
+            <button id="heroPlay" class="cbtn play" title="Xem ngay" aria-label="Xem ngay">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <button id="heroSave" class="cbtn" title="Lưu" aria-label="Lưu">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.1 21.35l-1.1-.99C5.14 15.24 2 12.36 2 8.99 2 6.42 4.42 4 7 4c1.66 0 3.14.79 4 2.02C11.86 4.79 13.34 4 15 4c2.58 0 5 2.42 5 4.99 0 3.37-3.14 6.25-8.9 11.37z"/></svg>
+            </button>
+            <button id="heroInfo" class="cbtn" title="Thông tin" aria-label="Thông tin">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm.75 7.5a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM11 11h2v6h-2z"/></svg>
+            </button>
           </div>
         </div>
       </div>
+      <div id="heroStrip" class="hero__strip"></div>
     </div>
   </div>
 
-  <!-- quick chips -->
+  <!-- Chips nhanh -->
   <div class="chips">
     <button class="chip" data-key="Marvel">Marvel</button>
     <button class="chip" data-key="4K">4K</button>
@@ -207,35 +378,63 @@ footer a{color:#93c5fd}
     <button class="chip" data-key="Tâm lý">Tâm lý</button>
   </div>
 
-  <!-- Hàn / Trung / US-UK -->
+  <!-- Billboard Ad -->
+  <div id="adTopBillboard" class="ad-slot" aria-label="Quảng cáo"></div>
+
+  <!-- ===== Kho Tàng Anime Mới Nhất ===== -->
+  <section id="animeVaultSec" class="av-sec">
+    <div class="hdrline">
+      <h2>Kho Tàng Anime Mới Nhất</h2>
+      <button class="go" id="goMoreAnime" title="Xem thêm">›</button>
+    </div>
+    <div class="anivault" id="animeVault" role="region" aria-label="Kho Tàng Anime">
+      <div class="bg" id="avBg"></div>
+      <div class="overlay"></div>
+      <div class="inner">
+        <h3 class="av-title" id="avTitle">Đang tải…</h3>
+        <div class="av-sub" id="avSub"></div>
+        <div class="av-badges" id="avBadges"></div>
+        <div class="av-tags" id="avTags"></div>
+        <div class="av-desc" id="avDesc"></div>
+        <div class="av-cta">
+          <button class="cbtn play" id="avPlay" title="Xem ngay" aria-label="Xem ngay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+          <button class="cbtn" id="avFav" title="Lưu" aria-label="Lưu"><svg viewBox="0 0 24 24"><path d="M12.1 21.35l-1.1-.99C5.14 15.24 2 12.36 2 8.99 2 6.42 4.42 4 7 4c1.66 0 3.14.79 4 2.02C11.86 4.79 13.34 4 15 4c2.58 0 5 2.42 5 4.99 0 3.37-3.14 6.25-8.9 11.37z"/></svg></button>
+          <button class="cbtn" id="avInfo" title="Thông tin" aria-label="Thông tin"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm.75 7.5a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM11 11h2v6h-2z"/></svg></button>
+        </div>
+        <div class="av-strip" id="avStrip"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rows -->
   <div class="sec"><h2>Phim Hàn Quốc mới</h2><a class="chip" data-go="quocgia-hq">Xem thêm ›</a></div>
-  <div class="row">
-    <button class="nav left" data-target="row-hq">‹</button>
-    <div id="row-hq" class="movie-row"></div>
-    <button class="nav right" data-target="row-hq">›</button>
-  </div>
+  <div class="row"><div id="row-hq" class="movie-row"></div></div>
 
   <div class="sec"><h2>Phim Trung Quốc mới</h2><a class="chip" data-go="quocgia-tq">Xem thêm ›</a></div>
-  <div class="row">
-    <button class="nav left" data-target="row-tq">‹</button>
-    <div id="row-tq" class="movie-row"></div>
-    <button class="nav right" data-target="row-tq">›</button>
-  </div>
+  <div class="row"><div id="row-tq" class="movie-row"></div></div>
 
-  <div class="sec"><h2>Phim US-UK mới</h2><a class="chip" data-go="quocgia-usuk">Xem thêm ›</a></div>
-  <div class="row">
-    <button class="nav left" data-target="row-usuk">‹</button>
-    <div id="row-usuk" class="movie-row"></div>
-    <button class="nav right" data-target="row-usuk">›</button>
-  </div>
+  <div class="sec"><h2>Phim US–UK mới</h2><a class="chip" data-go="quocgia-usuk">Xem thêm ›</a></div>
+  <div class="row"><div id="row-usuk" class="movie-row"></div></div>
 
-  <!-- Hot rows -->
+  <div class="sec"><h2>Anime & Hoạt hình mới</h2><a class="chip" data-go="cat-hoat-hinh">Xem thêm ›</a></div>
+  <div class="row"><div id="row-anime" class="movie-row"></div></div>
+
   <div class="sec"><h2>🔥 Phim Hot</h2></div>
-  <div class="row">
-    <button class="nav left" data-target="row-hot">‹</button>
-    <div id="row-hot" class="movie-row"></div>
-    <button class="nav right" data-target="row-hot">›</button>
-  </div>
+  <div class="row"><div id="row-hot" class="movie-row"></div></div>
+
+  <!-- ✨ DẢI NÂNG CẤP -->
+  <div class="sec"><h2>✨ Đề xuất cho bạn</h2></div>
+  <div class="row"><div id="row-foru" class="movie-row"></div></div>
+
+  <div class="sec"><h2>⏳ Sắp chiếu</h2></div>
+  <div class="row"><div id="row-upcoming" class="movie-row"></div></div>
+
+  <div class="sec"><h2>🎯 Top Lượt Xem Cao Nhất</h2></div>
+  <div class="row"><div id="row-imdb" class="movie-row"></div></div>
+  <!-- / ✨ -->
+
+  <!-- In-page Ad giữa trang -->
+  <div id="adMidHome" class="ad-slot" aria-label="Quảng cáo"></div>
 
   <!-- Rankings -->
   <div class="sec"><h2>Bảng xếp hạng hôm nay</h2></div>
@@ -251,23 +450,40 @@ footer a{color:#93c5fd}
   </div>
 
   <div class="sec"><h2>🎞️ Phim bộ</h2></div>
-  <div class="row">
-    <button class="nav left" data-target="row-bo">‹</button>
-    <div id="row-bo" class="movie-row"></div>
-    <button class="nav right" data-target="row-bo">›</button>
-  </div>
+  <div class="row"><div id="row-bo" class="movie-row"></div></div>
 
   <div class="sec"><h2>🎬 Phim lẻ</h2></div>
-  <div class="row">
-    <button class="nav left" data-target="row-le">‹</button>
-    <div id="row-le" class="movie-row"></div>
-    <button class="nav right" data-target="row-le">›</button>
-  </div>
+  <div class="row"><div id="row-le" class="movie-row"></div></div>
 </section>
 
 <!-- EXPLORE -->
 <section id="explore" class="container" style="display:none">
   <div class="sec"><h2 id="exploreTitle">Khám phá</h2></div>
+
+  <!-- Bộ lọc nhanh -->
+  <div id="filterBar" class="toolbar">
+    <span class="label">Lọc nhanh:</span>
+    <label>Thể loại
+      <select id="fCat"><option value="">Tất cả</option></select>
+    </label>
+    <label>Quốc gia
+      <select id="fCountry"><option value="">Tất cả</option></select>
+    </label>
+    <label>Năm
+      <select id="fYear"><option value="">Tất cả</option></select>
+    </label>
+    <div class="sep"></div>
+    <label>Sắp xếp
+      <select id="fSort">
+        <option value="new" selected>Mới nhất</option>
+        <option value="year">Năm ↓</option>
+        <option value="imdb">IMDb ↓</option>
+        <option value="az">A → Z</option>
+      </select>
+    </label>
+    <button id="fReset" class="btn btn-ghost btn-clear">Đặt lại</button>
+  </div>
+
   <div id="grid" class="grid"></div>
   <div id="sentinel" style="height:1px"></div>
 </section>
@@ -284,58 +500,167 @@ footer a{color:#93c5fd}
 
 <!-- POPUP -->
 <div id="popup" class="popup" role="dialog" aria-modal="true">
-  <span class="close" id="close">✕</span>
+  <span class="close" id="close" title="Đóng (Esc)">✕</span>
+
   <div class="popup-content">
-    <div id="player" class="player"></div>
+    <div class="detail-hero">
+      <div class="bg" id="dBg"></div>
+      <div class="overlay"></div>
+      <div class="inner">
+        <img id="dPoster" src="" alt="Poster" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+        <div class="pi">
+          <h2 class="detail-title" id="dTitle">...</h2>
+          <div class="detail-meta" id="dMeta">...</div>
+          <div class="cta">
+            <button id="btnPlayNow" class="btn">Xem ngay</button>
+            <button id="btnFav" class="btn btn-ghost">+ Lưu</button>
+            <button id="btnShare" class="btn btn-ghost">Chia sẻ</button>
+            <button id="btnReport" class="btn btn-ghost">Báo lỗi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toolbar" id="playerToolbar" style="display:none">
+      <label>Chất lượng
+        <select id="qualitySelect" aria-label="Chọn chất lượng">
+          <option value="auto">Auto</option>
+        </select>
+      </label>
+      <div class="sep"></div>
+      <label>Tốc độ
+        <select id="speedSelect" aria-label="Tốc độ">
+          <option>0.75</option><option selected>1.0</option>
+          <option>1.25</option><option>1.5</option><option>1.75</option><option>2.0</option>
+        </select>
+      </label>
+      <div class="sep"></div>
+      <label style="display:flex;align-items:center;gap:6px">
+        <input type="checkbox" id="autoNext" checked> Tự chuyển tập
+      </label>
+      <div style="flex:1"></div>
+      <button id="btnReload" class="btn btn-ghost" title="Tải lại nguồn">↻</button>
+      <button id="btnPiP" class="btn btn-ghost" title="Picture-in-Picture">PiP</button>
+      <button id="btnFS" class="btn btn-ghost" title="Toàn màn hình">⤢</button>
+    </div>
+
+    <div id="player" class="player">
+      <div class="loading" id="loading"></div>
+    </div>
+
+    <!-- Ad dưới player -->
+    <div id="adPlayer" class="ad-slot" aria-label="Quảng cáo"></div>
+
     <div class="pb">
-      <img id="pPoster" src="" alt="Poster" loading="lazy" decoding="async" referrerpolicy="no-referrer">
       <div class="pi">
-        <h3 id="pTitle">...</h3>
-        <div id="pMeta" class="m"></div>
+        <h4>Giới thiệu</h4>
         <div id="pDesc" class="desc"></div>
         <button id="pToggle" class="toggle" style="display:none">Xem thêm ▼</button>
-        <div style="margin:10px 0;display:flex;gap:8px">
-          <button id="pSave" class="btn btn-pill">+ Lưu</button>
-          <button id="pReport" class="btn btn-pill" style="background:#1f2937">Báo lỗi</button>
-          <button id="pShare" class="btn btn-pill" style="background:#1f2937">Chia sẻ</button>
-        </div>
-        <h4>Danh sách tập</h4>
+
+        <h4 style="margin-top:14px">Danh sách tập</h4>
         <div id="eps" class="eps"></div>
+
+        <h4 style="margin-top:14px">Diễn viên</h4>
+        <div id="cast" class="cast"></div>
+
+        <h4 style="margin-top:14px">Đề xuất tương tự</h4>
+        <div class="row"><div id="row-similar" class="movie-row"></div></div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Sticky mobile ad -->
+<div id="adSticky" class="ad-sticky" style="display:none">
+  <span class="ad-close" id="adStickyClose">✕</span>
+  <div id="adStickyInner"></div>
+</div>
+
 <footer>
   <div class="footer-content">
-    <p>THANHPHAT tổng hợp dữ liệu phim từ Internet / phimapi.com. Chúng tôi không lưu trữ video.</p>
+    <p> PHIM HAY - PHIM MỚI - CHẤT LƯỢNG CẬP NHẬT MỖI NGÀY !</p>
     <p>© 2025 THANHPHAT</p>
+
+    <!-- Huy hiệu thông điệp biển đảo -->
+    <div class="footer-badge" role="note" aria-label="Hoàng Sa &amp; Trường Sa là của Việt Nam!">
+      <span class="star" aria-hidden="true">★</span>
+      <span>Hoàng Sa &amp; Trường Sa là của Việt Nam!</span>
+    </div>
   </div>
 </footer>
 
 <script>
-/* =================== Helpers & API =================== */
+/* =============== Helpers & API =============== */
 const API_BASE='https://phimapi.com';
 const API_V1=API_BASE+'/v1/api';
 const $=s=>document.querySelector(s);const $$=s=>document.querySelectorAll(s);
 const toast=(m,t=1800)=>{const d=document.createElement('div');d.className='toast';d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.remove(),t)};
-function absUrl(p,cdn='https://phimimg.com'){if(!p)return'';if(/^https?:\/\//i.test(p))return p;if(p.startsWith('//'))return (location.protocol||'https:')+p;if(p.startsWith('/upload/'))return cdn+p;return cdn.replace(/\/+$/,'')+'/'+p.replace(/^\/+/,'')}
-function wsrv(u){try{const x=new URL(u);return 'https://wsrv.nl/?url='+encodeURIComponent(x.host+x.pathname+(x.search||''))}catch{return''}}
-function ph(t){const s=(t||'Poster').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));return `data:image/svg+xml;utf8,`+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='480' height='720'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='#0b1020'/><stop offset='1' stop-color='#111827'/></linearGradient></defs><rect width='100%' height='100%' fill='url(#g)'/><g fill='#9ca3af' transform='translate(240,280)'><circle r='38'/><rect x='-60' y='50' width='120' height='6' rx='3'/></g><text x='50%' y='92%' font-size='26' fill='#9ca3af' text-anchor='middle' font-family='system-ui,Segoe UI,Roboto,sans-serif'>${s}</text></svg>`)}
-function imgChain(raw,cdn){const a=absUrl(raw,cdn);if(!a)return [ph('Poster')];const httpsFix=(location.protocol==='https:'&&/^http:\/\//i.test(a))?a.replace(/^http:/,'https:'):'';const proxy=`${API_BASE}/image.php?url=${encodeURIComponent(a)}`;const w=wsrv(a);const list=[proxy,w,httpsFix,a].filter(Boolean);list.push(ph('Poster'));return [...new Set(list)]}
-function onImgError(img){const l=(img.dataset.f||'').split('|').filter(Boolean);let i=+img.dataset.i||0;if(i<l.length-1){img.dataset.i=++i;img.src=l[i]}else{img.onerror=null;img.src=l[l.length-1]}}
+
+/* Ảnh + fallback chuỗi */
+function absUrl(p,cdn='https://phimimg.com'){
+  if(!p) return '';
+  if(/^https?:\/\//i.test(p)) return p;
+  if(p.startsWith('//')) return (location.protocol||'https:')+p;
+  if(p.startsWith('/upload/')) return cdn.replace(/\/+$/,'')+p;
+  return cdn.replace(/\/+$/,'')+'/'+p.replace(/^\/+/,'' );
+}
+function weserv(u){try{const x=new URL(u);return 'https://images.weserv.nl/?url='+encodeURIComponent(x.host+x.pathname+(x.search||''))}catch{return''}}
+function ph(t){
+  const s=(t||'Poster').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return 'data:image/svg+xml;utf8,'+encodeURIComponent(
+`<svg xmlns='http://www.w3.org/2000/svg' width='480' height='720'>
+  <defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='#0b1020'/><stop offset='1' stop-color='#111827'/></linearGradient></defs>
+  <rect width='100%' height='100%' fill='url(#g)'/>
+  <g fill='#9ca3af' transform='translate(240,280)'><circle r='38'/><rect x='-60' y='50' width='120' height='6' rx='3'/></g>
+  <text x='50%' y='92%' font-size='26' fill='#9ca3af' text-anchor='middle' font-family='system-ui,Segoe UI,Roboto,sans-serif'>${s}</text>
+</svg>`)}
+function imgChain(raw,cdn){
+  const a=absUrl(raw,cdn); if(!a) return [ph('Poster')];
+  const httpsFix=(location.protocol==='https:'&&/^http:\/\//i.test(a))?a.replace(/^http:/,'https:'):'';
+  const ws=weserv(a);
+  const list=[ws,httpsFix,a].filter(Boolean); list.push(ph('Poster')); return [...new Set(list)];
+}
+function onImgError(img){
+  const l=(img.dataset.f||'').split('|').filter(Boolean);
+  let i=+img.dataset.i||0;
+  if(i<l.length-1){ img.dataset.i=++i; img.src=l[i]; }
+  else { img.onerror=null; img.src=l[l.length-1]; }
+}
 window.onImgError=onImgError;
 
+/* Fetch + cache nhẹ */
 const memCache=new Map();
-async function fetchJSON(u,t=10000){if(memCache.has(u)) return memCache.get(u);const c=new AbortController();const k=setTimeout(()=>c.abort(),t);try{const r=await fetch(u,{signal:c.signal,credentials:'omit',cache:'force-cache'});clearTimeout(k);if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();memCache.set(u,j);return j}catch(e){clearTimeout(k);throw e}}
+async function fetchJSON(u,t=12000){
+  if(memCache.has(u)) return memCache.get(u);
+  const c=new AbortController(); const k=setTimeout(()=>c.abort(),t);
+  try{
+    const r=await fetch(u,{signal:c.signal,credentials:'omit',cache:'force-cache'});
+    clearTimeout(k); if(!r.ok) throw new Error('HTTP '+r.status);
+    const j=await r.json(); memCache.set(u,j); return j;
+  }catch(e){ clearTimeout(k); throw e; }
+}
+function normList(raw){
+  let it=[],cp=1,tp=1,cdn='https://phimimg.com';
+  if(raw?.data?.items){
+    it=raw.data.items; const p=raw.data.params?.pagination||{};
+    cp=p.currentPage||p.current_page||1; tp=p.totalPages||p.total_pages||1;
+    cdn=raw.data.APP_DOMAIN_CDN_IMAGE||cdn;
+  }else{
+    it=raw.items||[]; cp=raw.pagination?.currentPage||1; tp=raw.pagination?.totalPages||1;
+    cdn=raw.APP_DOMAIN_CDN_IMAGE||cdn;
+  }
+  return {items:it,cp,tp,cdn};
+}
 
-function normList(raw){let it=[],cp=1,tp=1,cdn='https://phimimg.com';if(raw?.data?.items){it=raw.data.items;const p=raw.data.params?.pagination||{};cp=p.currentPage||p.current_page||1;tp=p.totalPages||p.total_pages||1;cdn=raw.data.APP_DOMAIN_CDN_IMAGE||cdn}else{it=raw.items||[];cp=raw.pagination?.currentPage||1;tp=raw.pagination?.totalPages||1;cdn=raw.APP_DOMAIN_CDN_IMAGE||cdn}return {items:it,cp,tp,cdn}}
-
-/* =================== UI building =================== */
+/* =============== UI building =============== */
 function card(movie, cdn){
   const t=movie.name||movie.origin_name||'Không tên';
   const srcs=imgChain(movie.poster_url||movie.thumb_url||movie.poster||movie.image||'',cdn);
-  const div=document.createElement('div');div.className='movie';div.dataset.slug=movie.slug||'';
+  const div=document.createElement('div');
+  div.className='movie';
+  div.dataset.slug=movie.slug||'';
+  div.setAttribute('tabindex','0'); div.setAttribute('role','button');
+  div.setAttribute('aria-label',`Xem chi tiết ${t}`);
   div.innerHTML=`<div class="poster shine">
       <img src="${srcs[0]}" alt="${t.replace(/"/g,'&quot;')}" loading="lazy" decoding="async" referrerpolicy="no-referrer"
            data-f="${srcs.join('|')}" data-i="0" onerror="onImgError(this)">
@@ -348,16 +673,37 @@ function card(movie, cdn){
         </div>
       </div>
     </div>`;
-  const pEl=()=>div.querySelector('.poster');
-  div.addEventListener('pointermove',e=>{const r=pEl().getBoundingClientRect();const x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;pEl().style.setProperty('--rx',((.5-y)*10)+'deg');pEl().style.setProperty('--ry',((x-.5)*10)+'deg')},{passive:true});
+
+  // Tilt
+  const pEl=()=>div.querySelector('.poster'); let raf=0, lastX=0, lastY=0;
+  div.addEventListener('pointermove',e=>{
+    lastX=e.clientX; lastY=e.clientY; if(raf) return;
+    raf=requestAnimationFrame(()=>{
+      const r=pEl().getBoundingClientRect(), x=(lastX-r.left)/r.width, y=(lastY-r.top)/r.height;
+      pEl().style.setProperty('--rx',((.5-y)*10)+'deg');
+      pEl().style.setProperty('--ry',((x-.5)*10)+'deg'); raf=0;
+    });
+  },{passive:true});
   div.addEventListener('pointerleave',()=>{const p=pEl();p.style.setProperty('--rx','0deg');p.style.setProperty('--ry','0deg')});
-  div.addEventListener('click',()=>openDetail(movie.slug));
+
+  const go=()=>{ if(div.closest('.movie-row')?.dataset.dragging==='1') return; openDetail(movie.slug); };
+  div.addEventListener('click',go);
+  div.addEventListener('keydown',(e)=>{if(e.key==='Enter' || e.key===' '){e.preventDefault();go()}});
+
   return div;
 }
-function fillRow(containerId, items, cdn){const el=document.getElementById(containerId);el.innerHTML='';items.forEach(m=>el.appendChild(card(m,cdn)))}
-function skeletonRow(containerId,n=10){const el=document.getElementById(containerId);el.innerHTML='';for(let i=0;i<n;i++){const d=document.createElement('div');d.className='movie';d.innerHTML='<div class="skeleton"></div>';el.appendChild(d)}}
+function fillRow(containerId, items, cdn){
+  const el=document.getElementById(containerId); if(!el) return;
+  el.innerHTML='';
+  items.forEach(m=>el.appendChild(card(m,cdn)));
+}
+function skeletonRow(containerId,n=10){
+  const el=document.getElementById(containerId); if(!el) return;
+  el.innerHTML='';
+  for(let i=0;i<n;i++){const d=document.createElement('div');d.className='movie';d.innerHTML='<div class="skeleton"></div>';el.appendChild(d)}
+}
 
-/* rankings */
+/* BXH */
 function renderRank(listEl, items, cdn){
   listEl.innerHTML='';
   items.slice(0,5).forEach((m,i)=>{
@@ -365,34 +711,136 @@ function renderRank(listEl, items, cdn){
     const li=document.createElement('li');
     li.innerHTML=`
       <div class="no">${i+1}</div>
-      <img src="${img}" alt="">
+      <img src="${img}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
       <div>
         <div style="font-weight:800">${m.name||m.origin_name||''}</div>
-        <div style="color:#9aa4b5;font-size:13px">${m.origin_name?m.origin_name:''} ${m.year?`• ${m.year}`:''}</div>
+        <div style="color:#9aa4b5;font-size:13px">${m.origin_name?m.origin_name:''}${m.year?` • ${m.year}`:''}</div>
       </div>`;
     li.onclick=()=>openDetail(m.slug);
     listEl.appendChild(li);
   });
 }
 
-/* =================== Home data =================== */
+/* ===== Hero logic ===== */
+const heroState={list:[],cdn:'https://phimimg.com',current:null};
+function buildHero(m,cdn){
+  if(!m) return;
+  heroState.current=m;
+  const poster=imgChain(m.poster_url||m.thumb_url||'',cdn)[0];
+  $('#heroPoster').src=poster; $('#heroBg').style.backgroundImage=`url('${poster}')`;
+  $('#heroTitle').textContent=m.name||m.origin_name||'';
+  const b=[]; if(m.year)b.push(`<span class="badge">${m.year}</span>`); if(m.lang)b.push(`<span class="badge">${m.lang}</span>`); if(m.quality)b.push(`<span class="badge">${m.quality}</span>`);
+  $('#heroBadges').innerHTML=b.join('');
+  $('#heroDesc').textContent=m.content || m.description || '...';
+  $('#heroPlay').onclick=()=>openDetail(m.slug);
+  $('#heroInfo').onclick=()=>openDetail(m.slug);
+  $('#heroSave').onclick=()=>toggleFav(m);
+}
+function renderHeroStrip(){
+  const s=$('#heroStrip'); s.innerHTML='';
+  heroState.list.slice(0,18).forEach((it,idx)=>{
+    const im=imgChain(it.poster_url||it.thumb_url||'',heroState.cdn)[0];
+    const d=document.createElement('div'); d.className='hthumb'+(idx===0?' active':'');
+    d.innerHTML=`<div class="box"><img src="${im}" alt="${(it.name||'').replace(/"/g,'&quot;')}" loading="lazy" decoding="async" referrerpolicy="no-referrer"></div>`;
+    d.addEventListener('mouseenter',()=>{ $$('.hthumb').forEach(x=>x.classList.remove('active')); d.classList.add('active'); buildHero(it,heroState.cdn); });
+    d.addEventListener('click',()=>openDetail(it.slug));
+    s.appendChild(d);
+  });
+}
+
+/* =============== Anime Vault =============== */
+const animeState={list:[],cdn:'https://phimimg.com',current:null};
+async function loadAnimeVault(){
+  const urls=[
+    `${API_V1}/the-loai/anime?page=1&limit=36`,
+    `${API_V1}/the-loai/hoat-hinh?page=1&limit=36`,
+    `${API_V1}/danh-sach/hoat-hinh?page=1&limit=36`
+  ];
+  for(const u of urls){
+    try{
+      const d=normList(await fetchJSON(u));
+      if(d.items?.length){ animeState.list=d.items; animeState.cdn=d.cdn; break; }
+    }catch{}
+  }
+  renderAnimeVault(animeState.list[0]);
+}
+$('#goMoreAnime').onclick=()=>startExplore('cat:hoat-hinh','Thể loại: Hoạt hình');
+
+function badgeEl(t){const s=document.createElement('span');s.className='badge2';s.textContent=t;return s}
+function renderAnimeVault(movie){
+  const m=movie||{};
+  animeState.current=m;
+  const poster=imgChain(m.poster_url||m.thumb_url||'',animeState.cdn)[0];
+  $('#avBg').style.backgroundImage=`url('${poster||''}')`;
+  $('#avTitle').textContent=m.name||m.origin_name||'Đang tải…';
+  $('#avSub').textContent=m.origin_name||'';
+  const bag=$('#avBadges'); bag.innerHTML='';
+  if(typeof m.imdb==='number') bag.appendChild(badgeEl('IMDb '+m.imdb.toFixed(1)));
+  if(m.year) bag.appendChild(badgeEl(m.year));
+  if(m.episode_current){
+    const num=(m.episode_current.match(/\d+/)||[])[0];
+    if(num) bag.appendChild(badgeEl('Tập '+num));
+  }
+  if(m.quality) bag.appendChild(badgeEl(m.quality));
+  const tg=$('#avTags'); tg.innerHTML='';
+  (m.category||[]).slice(0,4).forEach(c=>{const t=document.createElement('span');t.className='tag';t.textContent=c.name; tg.appendChild(t);});
+  $('#avDesc').textContent=(m.content||'').trim()||'...';
+
+  $('#avPlay').onclick=()=>openDetail(m.slug);
+  $('#avFav').onclick=()=>toggleFav({slug:m.slug,name:m.name||m.origin_name,poster_url:m.poster_url||m.thumb_url,year:m.year});
+  $('#avInfo').onclick=()=>openDetail(m.slug);
+
+  const strip=$('#avStrip'); strip.innerHTML='';
+  animeState.list.slice(0,20).forEach((it,idx)=>{
+    const im=imgChain(it.poster_url||it.thumb_url||'',animeState.cdn)[0];
+    const d=document.createElement('div'); d.className='av-thumb'+(it.slug===m.slug?' active':'');
+    d.innerHTML=`<div class="box"><img src="${im}" alt="${(it.name||'').replace(/"/g,'&quot;')}" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span class="cap">${(it.year||'')}</span></div>`;
+    d.addEventListener('mouseenter',()=>{renderAnimeVault(it)});
+    d.addEventListener('focus',()=>{renderAnimeVault(it)});
+    d.addEventListener('click',()=>openDetail(it.slug));
+    strip.appendChild(d);
+  });
+}
+
+/* =============== Home data =============== */
 async function loadHome(){
   try{
-    ['row-hot','row-hq','row-tq','row-usuk','row-bo','row-le'].forEach(id=>skeletonRow(id));
-    const urls=[`${API_BASE}/danh-sach/phim-moi-cap-nhat-v3?page=1`,`${API_BASE}/danh-sach/phim-moi-cap-nhat-v2?page=1`,`${API_BASE}/danh-sach/phim-moi-cap-nhat?page=1`];
-    let hot=null;for(const u of urls){try{hot=normList(await fetchJSON(u));break}catch{}}
-    if(hot){fillRow('row-hot', hot.items.slice(0,12), hot.cdn);buildHero(hot.items[0],hot.cdn)}
+    ['row-hot','row-hq','row-tq','row-usuk','row-bo','row-le','row-anime','row-foru','row-upcoming','row-imdb'].forEach(id=>skeletonRow(id));
+    loadAnimeVault();
 
-    // quốc gia
+    // Hot
+    const urls=[`${API_BASE}/danh-sach/phim-moi-cap-nhat-v3?page=1`,`${API_BASE}/danh-sach/phim-moi-cap-nhat-v2?page=1`,`${API_BASE}/danh-sach/phim-moi-cap-nhat?page=1`];
+    let hot=null; for(const u of urls){ try{ hot=normList(await fetchJSON(u)); break; }catch{} }
+    if(hot){
+      fillRow('row-hot', hot.items.slice(0,12), hot.cdn);
+      heroState.list = hot.items.slice(0,18);
+      heroState.cdn  = hot.cdn;
+      buildHero(heroState.list[0],hot.cdn);
+      renderHeroStrip();
+    }
+
+    // Quốc gia
     loadBy(`${API_V1}/quoc-gia/han-quoc?page=1&limit=36`,'row-hq');
     loadBy(`${API_V1}/quoc-gia/trung-quoc?page=1&limit=36`,'row-tq');
     loadBy(`${API_V1}/quoc-gia/au-my?page=1&limit=36`,'row-usuk');
 
-    // list
+    // Anime & hoạt hình (row)
+    loadByTry([
+      `${API_V1}/the-loai/anime?page=1&limit=36`,
+      `${API_V1}/the-loai/hoat-hinh?page=1&limit=36`,
+      `${API_V1}/danh-sach/hoat-hinh?page=1&limit=36`
+    ],'row-anime');
+
+    // Danh sách
     loadBy(`${API_V1}/danh-sach/phim-bo?page=1&limit=36`,'row-bo');
     loadBy(`${API_V1}/danh-sach/phim-le?page=1&limit=36`,'row-le');
 
-    // rankings
+    // ✨ Dải nâng cấp
+    loadRecommendations(hot);
+    loadUpcoming(hot);
+    loadTopIMDb(hot);
+
+    // BXH
     (async()=>{
       try{
         const t=normList(await fetchJSON(`${API_V1}/danh-sach/phim-bo?page=1&limit=36`));
@@ -402,40 +850,111 @@ async function loadHome(){
         const f=favList();
         if(f && f.length){
           renderRank($('#rank-fav'), f.map(x=>({slug:x.slug,name:x.name,origin_name:x.name,poster_url:x.poster,year:x.year})), 'https://phimimg.com');
-        }else if(hot){
-          renderRank($('#rank-fav'), hot.items, hot.cdn);
-        }
+        }else if(hot){ renderRank($('#rank-fav'), hot.items, hot.cdn); }
       }catch{}
     })();
-  }catch(e){toast('Lỗi tải trang chủ')}
+
+    setupRows();
+  }catch(e){ toast('Lỗi tải trang chủ'); }
 }
-async function loadBy(url, cid){try{const d=normList(await fetchJSON(url));fillRow(cid,d.items,d.cdn)}catch{}}
-function buildHero(m,cdn){
-  if(!m) return;
-  const poster=imgChain(m.poster_url||m.thumb_url||'',cdn)[0];
-  $('#heroPoster').src=poster; $('#heroBg').style.backgroundImage=`url('${poster}')`;
-  $('#heroTitle').textContent=m.name||m.origin_name||'';
-  const b=[]; if(m.year)b.push(`<span class="badge">${m.year}</span>`); if(m.lang)b.push(`<span class="badge">${m.lang}</span>`); if(m.quality)b.push(`<span class="badge">${m.quality}</span>`);
-  $('#heroBadges').innerHTML=b.join('');
-  $('#heroDesc').textContent=m.content || m.description || '...';
-  $('#heroPlay').onclick=()=>openDetail(m.slug);
-  $('#heroSave').onclick=()=>toggleFav(m);
+async function loadBy(url, cid){ try{const d=normList(await fetchJSON(url)); fillRow(cid,d.items,d.cdn);}catch{} }
+async function loadByTry(urls,cid){
+  for(const u of urls){ try{ const d=normList(await fetchJSON(u)); if(d.items?.length){ fillRow(cid,d.items,d.cdn); return; } }catch{} }
 }
 
-/* =================== Explore/Search =================== */
+/* ---- Dải: Đề xuất cho bạn ---- */
+async function loadRecommendations(hotData){
+  skeletonRow('row-foru');
+  let items=[], cdn='https://phimimg.com';
+  const h=hisList();
+  if(h && h.length){
+    const slugs=h.slice(0,3).map(x=>x.slug);
+    const catSet=new Set();
+    for(const s of slugs){
+      try{
+        const d=await fetchJSON(`${API_BASE}/phim/${s}`);
+        (d.movie?.category||[]).forEach(c=>catSet.add(c.slug||c.name));
+      }catch{}
+    }
+    for(const cat of Array.from(catSet).slice(0,3)){
+      try{
+        const d=normList(await fetchJSON(`${API_V1}/the-loai/${cat}?page=1&limit=36`));
+        cdn=d.cdn; items=items.concat(d.items.slice(0,12));
+      }catch{}
+    }
+  }
+  if(!items.length && hotData){ items=hotData.items.slice(0,12); cdn=hotData.cdn; }
+  const seen=new Set(), uniq=[];
+  items.forEach(m=>{ if(!seen.has(m.slug)){ seen.add(m.slug); uniq.push(m); }});
+  fillRow('row-foru', uniq.slice(0,12), cdn);
+}
+
+/* ---- Dải: Sắp chiếu ---- */
+async function loadUpcoming(hotData){
+  skeletonRow('row-upcoming');
+  const sources=[
+    `${API_V1}/danh-sach/phim-le?page=1&limit=36`,
+    `${API_V1}/danh-sach/phim-le?page=2&limit=36`,
+    `${API_V1}/danh-sach/phim-bo?page=1&limit=36`
+  ];
+  let list=[], cdn='https://phimimg.com';
+  for(const u of sources){ try{ const d=normList(await fetchJSON(u)); cdn=d.cdn; list=list.concat(d.items); }catch{} }
+  const nowY=new Date().getFullYear();
+  const up=list.filter(m=>{
+    const q=(m.quality||'').toLowerCase(), ec=(m.episode_current||'').toLowerCase(), st=(m.status||'').toLowerCase();
+    return q.includes('trailer') || ec.includes('trailer') || st.includes('trailer') || (m.year && m.year>=nowY);
+  }).sort((a,b)=>{
+    const at=(''+a.quality).toLowerCase().includes('trailer')?1:0;
+    const bt=(''+b.quality).toLowerCase().includes('trailer')?1:0;
+    if(bt-at) return bt-at;
+    return (b.year||0)-(a.year||0);
+  });
+  if(!up.length && hotData){ fillRow('row-upcoming', hotData.items.slice(12,24), hotData.cdn); }
+  else fillRow('row-upcoming', up.slice(0,12), cdn);
+}
+
+/* ---- Dải: Top IMDb ---- */
+async function loadTopIMDb(hotData){
+  skeletonRow('row-imdb');
+  const sources=[
+    `${API_V1}/danh-sach/phim-le?page=1&limit=36`,
+    `${API_V1}/danh-sach/phim-bo?page=1&limit=36`,
+    `${API_BASE}/danh-sach/phim-moi-cap-nhat-v3?page=1`
+  ];
+  let list=[], cdn='https://phimimg.com';
+  for(const u of sources){ try{ const d=normList(await fetchJSON(u)); cdn=d.cdn; list=list.concat(d.items); }catch{} }
+  list=list.filter(m=>typeof m.imdb==='number').sort((a,b)=>(b.imdb||0)-(a.imdb||0));
+  if(!list.length && hotData){ fillRow('row-imdb', hotData.items.slice(0,12), hotData.cdn); }
+  else fillRow('row-imdb', list.slice(0,12), cdn);
+}
+
+/* =============== Explore/Search =============== */
 let explorePage=1, exploreType='phim-le', exploreKey='', exploreTotal=1, exploreCDN='https://phimimg.com';
+const exploreFilters={cat:'',country:'',year:'',sort:'new'};
+const TAX={cats:[],countries:[]};
+
 function setView(id){
   ['home','explore','fav','his'].forEach(v=>document.getElementById(v).style.display=(v===id)?'block':'none');
   requestAnimationFrame(()=>window.scrollTo({top:0,behavior:'auto'}));
+}
+function setActiveTabByView(view){
+  $$('#tabs .tab').forEach(x=>{
+    const is = (x.dataset.view===view) || (view==='explore' && x.dataset.view==='explore' && x.dataset.type===exploreType);
+    x.classList.toggle('active',is);
+  });
 }
 $('#tabs').addEventListener('click',e=>{
   const t=e.target.closest('.tab'); if(!t) return;
   $$('#tabs .tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
   const view=t.dataset.view;
-  if(view==='home'){setView('home');return}
-  if(view==='explore'){exploreType=t.dataset.type;startExplore(exploreType,'Khám phá: '+t.textContent);return}
-  if(view==='fav'){renderFav();setView('fav');return}
-  if(view==='his'){renderHistory();setView('his');return}
+  if(view==='home'){ closePopup(); setView('home'); history.replaceState('',document.title,location.pathname); return; }
+  if(view==='explore'){ exploreType=t.dataset.type; startExplore(exploreType,'Khám phá: '+t.textContent); return; }
+  if(view==='fav'){ renderFav(); setView('fav'); return; }
+  if(view==='his'){ renderHistory(); setView('his'); return; }
+});
+document.getElementById('homeBtn').addEventListener('click',()=>{
+  setView('home'); setActiveTabByView('home'); closePopup();
+  history.replaceState('',document.title,location.pathname);
 });
 document.querySelectorAll('.chip[data-go]').forEach(c=>{
   c.onclick=()=>{
@@ -443,42 +962,186 @@ document.querySelectorAll('.chip[data-go]').forEach(c=>{
     if(v==='quocgia-hq') startExplore('han-quoc','Khám phá: Hàn Quốc');
     else if(v==='quocgia-tq') startExplore('trung-quoc','Khám phá: Trung Quốc');
     else if(v==='quocgia-usuk') startExplore('au-my','Khám phá: US-UK');
+    else if(v==='cat-hoat-hinh') startExplore('cat:hoat-hinh','Thể loại: Hoạt hình');
   };
 });
-document.querySelectorAll('.chip[data-key]').forEach(c=>c.onclick=()=>{const k=c.dataset.key;startExplore(k,`Kết quả: “${k}”`);location.hash='#search='+encodeURIComponent(k)})
+document.querySelectorAll('.chip[data-key]').forEach(c=>c.onclick=()=>{const k=c.dataset.key;startExplore(k,`Kết quả: “${k}”`);location.hash='#search='+encodeURIComponent(k)});
+
+/* Taxonomy cho bộ lọc */
+async function fetchTaxonomies(){
+  try{
+    const catsRaw=await fetchJSON(`${API_V1}/the-loai`);
+    const c=(catsRaw?.data?.items)||catsRaw?.items||catsRaw||[];
+    let cats=c.map(x=>({slug:x.slug||x.key||x.name?.toLowerCase()?.replace(/\s+/g,'-')||'', name:x.name||x.title||x.key||''}))
+              .filter(x=>x.slug&&x.name);
+    cats=cats.filter(x=>x.slug!=='hoat-hinh');
+    if(!cats.some(x=>x.slug==='anime')) cats.push({slug:'anime',name:'Anime'});
+    TAX.cats=cats;
+  }catch{
+    TAX.cats=[
+      {slug:'hanh-dong',name:'Hành động'},{slug:'vien-tuong',name:'Viễn tưởng'},
+      {slug:'hai-huoc',name:'Hài hước'},{slug:'kinh-di',name:'Kinh dị'},
+      {slug:'tam-ly',name:'Tâm lý'},{slug:'tinh-cam',name:'Tình cảm'},
+      {slug:'anime',name:'Anime'}
+    ];
+  }
+  try{
+    const qgRaw=await fetchJSON(`${API_V1}/quoc-gia`);
+    const q=(qgRaw?.data?.items)||qgRaw?.items||qgRaw||[];
+    TAX.countries=q.map(x=>({slug:x.slug||x.key||x.name?.toLowerCase()?.replace(/\s+/g,'-')||'', name:x.name||x.title||x.key||''})).filter(x=>x.slug&&x.name);
+  }catch{
+    TAX.countries=[{slug:'au-my',name:'Âu Mỹ'},{slug:'han-quoc',name:'Hàn Quốc'},{slug:'trung-quoc',name:'Trung Quốc'},{slug:'nhat-ban',name:'Nhật Bản'},{slug:'thai-lan',name:'Thái Lan'},{slug:'viet-nam',name:'Việt Nam'}];
+  }
+}
+function buildFilterOptions(){
+  const fCat=$('#fCat'), fCountry=$('#fCountry'), fYear=$('#fYear');
+  if(!TAX.cats.length || !TAX.countries.length) return;
+  fCat.innerHTML='<option value="">Tất cả</option>'+TAX.cats.map(c=>`<option value="${c.slug}">${c.name}</option>`).join('');
+  fCountry.innerHTML='<option value="">Tất cả</option>'+TAX.countries.map(c=>`<option value="${c.slug}">${c.name}</option>`).join('');
+  const yNow=new Date().getFullYear();
+  const ys=['<option value="">Tất cả</option>'];
+  for(let y=yNow;y>=1990;y--) ys.push(`<option value="${y}">${y}</option>`);
+  fYear.innerHTML=ys.join('');
+  fCat.value=exploreFilters.cat||''; fCountry.value=exploreFilters.country||''; fYear.value=exploreFilters.year||''; $('#fSort').value=exploreFilters.sort||'new';
+}
+async function ensureFilterUI(){
+  if($('#filterBar').dataset.ready==='1') return;
+  await fetchTaxonomies();
+  buildFilterOptions();
+  $('#filterBar').dataset.ready='1';
+
+  $('#fCat').onchange=()=>{ exploreFilters.cat=$('#fCat').value; startExplore('filters','Kết quả lọc'); };
+  $('#fCountry').onchange=()=>{ exploreFilters.country=$('#fCountry').value; startExplore('filters','Kết quả lọc'); };
+  $('#fYear').onchange=()=>{ exploreFilters.year=$('#fYear').value; startExplore('filters','Kết quả lọc'); };
+  $('#fSort').onchange=()=>{ exploreFilters.sort=$('#fSort').value; startExplore('filters','Kết quả lọc'); };
+  $('#fReset').onclick=()=>{ exploreFilters.cat=''; exploreFilters.country=''; exploreFilters.year=''; exploreFilters.sort='new'; buildFilterOptions(); startExplore('filters','Khám phá'); };
+}
 
 function exploreUrl(page){
   if(exploreKey){
     const p=new URLSearchParams({keyword:exploreKey,page,limit:36});
     return `${API_V1}/tim-kiem?${p}`;
   }
+  if(exploreFilters.cat){
+    return `${API_V1}/the-loai/${exploreFilters.cat}?page=${page}&limit=36`;
+  }
+  if(exploreFilters.country){
+    return `${API_V1}/quoc-gia/${exploreFilters.country}?page=${page}&limit=36`;
+  }
+  if(exploreType.startsWith('cat:')){
+    const slug=exploreType.split(':')[1];
+    return `${API_V1}/the-loai/${slug}?page=${page}&limit=36`;
+  }
   if(['han-quoc','trung-quoc','au-my','nhat-ban','viet-nam'].includes(exploreType)){
     return `${API_V1}/quoc-gia/${exploreType}?page=${page}&limit=36`;
   }
   return `${API_V1}/danh-sach/${exploreType}?page=${page}&limit=36`;
 }
+
+/* Fallback thông minh cho Anime/Hoạt hình + filters */
+function exploreCandidates(page){
+  const urls=[];
+  if(exploreKey){
+    const p=new URLSearchParams({keyword:exploreKey,page,limit:36});
+    urls.push(`${API_V1}/tim-kiem?${p}`);
+    return urls;
+  }
+  if(exploreFilters.cat){
+    urls.push(`${API_V1}/the-loai/${exploreFilters.cat}?page=${page}&limit=36`);
+    if(exploreFilters.cat==='anime'){
+      urls.push(`${API_V1}/the-loai/hoat-hinh?page=${page}&limit=36`);
+      urls.push(`${API_V1}/danh-sach/hoat-hinh?page=${page}&limit=36`);
+    }
+    return urls;
+  }
+  if(exploreFilters.country){
+    urls.push(`${API_V1}/quoc-gia/${exploreFilters.country}?page=${page}&limit=36`);
+    return urls;
+  }
+  if(exploreType.startsWith('cat:')){
+    const slug=exploreType.split(':')[1];
+    urls.push(`${API_V1}/the-loai/${slug}?page=${page}&limit=36`);
+    if(['anime','hoat-hinh'].includes(slug)){
+      urls.push(`${API_V1}/the-loai/hoat-hinh?page=${page}&limit=36`);
+      urls.push(`${API_V1}/the-loai/anime?page=${page}&limit=36`);
+      urls.push(`${API_V1}/danh-sach/hoat-hinh?page=${page}&limit=36`);
+    }
+    return urls;
+  }
+  if(['han-quoc','trung-quoc','au-my','nhat-ban','viet-nam'].includes(exploreType)){
+    urls.push(`${API_V1}/quoc-gia/${exploreType}?page=${page}&limit=36`);
+    return urls;
+  }
+  urls.push(`${API_V1}/danh-sach/${exploreType}?page=${page}&limit=36`);
+  return urls;
+}
+
+function applyFilters(items){
+  let arr=[...(items||[])];
+  if(exploreFilters.country){
+    arr=arr.filter(m=>{
+      const c=(m.country||[]).map(x=>(x.slug||'').toLowerCase());
+      return c.includes(exploreFilters.country.toLowerCase());
+    });
+  }
+  if(exploreFilters.year){
+    arr=arr.filter(m=>String(m.year||'')===String(exploreFilters.year));
+  }
+  switch(exploreFilters.sort){
+    case 'year': arr.sort((a,b)=>(b.year||0)-(a.year||0)); break;
+    case 'imdb': arr.sort((a,b)=>(b.imdb||0)-(a.imdb||0)); break;
+    case 'az': arr.sort((a,b)=>( (a.name||a.origin_name||'').localeCompare(b.name||b.origin_name||'') )); break;
+    default: break;
+  }
+  return arr;
+}
+
 async function startExplore(typeOrKey, title){
   setView('explore'); $('#grid').innerHTML=''; $('#exploreTitle').textContent=title||'Khám phá';
-  explorePage=1; exploreTotal=2; exploreCDN='https://phimimg.com';
-  exploreKey=''; exploreType='phim-le';
+  await ensureFilterUI();
+  explorePage=1; exploreTotal=2; exploreCDN='https://phimimg.com'; exploreKey=''; exploreType='phim-le';
   if(typeof typeOrKey==='string'){
-    if(['phim-le','phim-bo','tv-shows','hoat-hinh'].includes(typeOrKey)) exploreType=typeOrKey;
+    if(typeOrKey==='filters'){ /* giữ filters */ }
+    else if(typeOrKey.startsWith('cat:')) exploreType=typeOrKey;
+    else if(['phim-le','phim-bo','tv-shows','hoat-hinh'].includes(typeOrKey)) exploreType=typeOrKey;
     else if(['han-quoc','trung-quoc','au-my','nhat-ban','viet-nam'].includes(typeOrKey)) exploreType=typeOrKey;
     else exploreKey=typeOrKey;
   }
+  setActiveTabByView('explore');
   for(let i=0;i<12;i++){const d=document.createElement('div');d.className='skeleton';$('#grid').appendChild(d)}
   await loadMoreExplore();
 }
+
 async function loadMoreExplore(){
   if(explorePage>exploreTotal) return;
   try{
-    const d=normList(await fetchJSON(exploreUrl(explorePage)));
-    exploreCDN=d.cdn; exploreTotal=d.tp;
-    const grid=$('#grid'); if(explorePage===1) grid.innerHTML='';
-    d.items.forEach(m=>grid.appendChild(card(m,exploreCDN)));
+    const candidates = exploreCandidates(explorePage);
+    let d=null;
+    for(const u of candidates){
+      try{
+        const tmp=normList(await fetchJSON(u));
+        if((tmp.items||[]).length){ d=tmp; break; }
+      }catch{}
+    }
+    const grid=$('#grid');
+    if(!d){
+      if(explorePage===1){
+        grid.innerHTML='<p style="color:#9aa4b5">Không tìm thấy nội dung cho mục này.</p>';
+      }
+      exploreTotal=0;
+      return;
+    }
+    exploreCDN=d.cdn; exploreTotal=d.tp||exploreTotal||explorePage;
+    let items=applyFilters(d.items||[]);
+    if(explorePage===1) grid.innerHTML='';
+    items.forEach(m=>grid.appendChild(card(m,exploreCDN)));
     explorePage++;
-  }catch{}
+  }catch{
+    if(explorePage===1) $('#grid').innerHTML='<p style="color:#9aa4b5">Không thể tải danh sách. Thử lại sau.</p>';
+    exploreTotal=0;
+  }
 }
+
 const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting) loadMoreExplore()})},{rootMargin:'1200px'}); io.observe($('#sentinel'));
 
 /* Search */
@@ -489,8 +1152,17 @@ $('#q').addEventListener('input',debounce(()=>{const v=$('#q').value.trim();if(v
 $('#q').addEventListener('keypress',e=>{if(e.key==='Enter') doSearch()});
 document.addEventListener('keydown',e=>{if(e.key==='/'&&document.activeElement!==$('#q')){e.preventDefault();$('#q').focus()}},{passive:true});
 
-/* =================== Detail & Player =================== */
-let hls=null, currentMovie=null;
+/* =============== Detail & Player (HLS) =============== */
+let hls=null, currentMovie=null, currentEp=null, currentEps=[];
+const LS={vol:'tp_vol',rate:'tp_rate',ql:'tp_ql_height',autonext:'tp_autonext'};
+
+function loadHlsLib(cb){
+  if(window.Hls){ cb(); return; }
+  const s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/hls.js@latest';
+  s.onload=cb; document.head.appendChild(s);
+}
+
 async function openDetail(slug){
   if(!slug) return;
   try{
@@ -498,57 +1170,295 @@ async function openDetail(slug){
     if(!d?.status) return toast('Không tìm thấy dữ liệu');
     const m=d.movie||{}; currentMovie=m; location.hash='#/p/'+slug;
     const cdn=d.APP_DOMAIN_CDN_IMAGE||'https://phimimg.com';
-    $('#pPoster').src=imgChain(m.poster_url||m.thumb_url||'',cdn)[0];
-    $('#pTitle').textContent=`${m.name||m.origin_name||''} ${m.year?`(${m.year})`:''}`;
-    $('#pMeta').innerHTML=`⏳ ${m.time||'N/A'} • ${m.quality||'N/A'}<br>🎭 ${(m.category||[]).map(x=>x.name).join(', ')||'Không rõ'}<br>🌐 ${(m.country||[]).map(x=>x.name).join(', ')||'Không rõ'}`;
+    const poster=imgChain(m.poster_url||m.thumb_url||'',cdn)[0];
+
+    $('#dPoster').src=poster;
+    $('#dBg').style.backgroundImage=`url('${poster}')`;
+    $('#dTitle').textContent=`${m.name||m.origin_name||''} ${m.year?`(${m.year})`:''}`;
+    $('#dMeta').innerHTML=`⏳ ${m.time||'N/A'} • ${m.quality||'N/A'} • ${(m.country||[]).map(x=>x.name).join(', ')||'Không rõ'}`;
+
     const desc=m.content||'Không có mô tả'; const el=$('#pDesc'); el.textContent=desc; const tg=$('#pToggle');
     if(desc.length>220){tg.style.display='inline-block';tg.textContent='Xem thêm ▼';tg.onclick=()=>{const ex=el.classList.toggle('exp');tg.textContent=ex?'Thu gọn':'Xem thêm ▼'} } else tg.style.display='none';
-    const eps=(d.episodes||[]).flatMap(sv=>(sv.server_data||[]).map((ep,i)=>({name:ep.name||`Tập ${i+1}`,embed:ep.link_embed,m3u8:ep.link_m3u8})));
-    const wrap=$('#eps'); wrap.innerHTML=''; eps.forEach(ep=>{const b=document.createElement('button');b.textContent=ep.name; b.onclick=()=>play(ep); wrap.appendChild(b)});
-    $('#pSave').onclick=()=>toggleFav(m);
-    $('#pReport').onclick=()=>{prompt('Mô tả lỗi phát (copy link này gửi cho admin):', location.href)};
-    $('#pShare').onclick=()=>{navigator.clipboard?.writeText(location.href); toast('Đã sao chép link')};
-    openPopup(); if(eps[0]) play(eps[0]);
+
+    currentEps=(d.episodes||[]).flatMap(sv=>(sv.server_data||[]).map((ep,i)=>({name:ep.name||`Tập ${i+1}`,embed:ep.link_embed,m3u8:ep.link_m3u8})));
+    const wrap=$('#eps'); wrap.innerHTML=''; currentEp=null;
+    currentEps.forEach((ep,idx)=>{const b=document.createElement('button');b.textContent=ep.name; b.onclick=()=>selectEp(ep,b); if(idx===0){b.classList.add('sel');currentEp=ep;} wrap.appendChild(b)});
+
+    // Cast
+    renderCast(m.actor);
+
+    // Similar
+    loadSimilar(m);
+
+    $('#btnPlayNow').textContent=currentEp?`Xem ngay (${currentEp.name})`:'Xem ngay';
+    $('#btnPlayNow').onclick=()=>{ if(currentEp) play(currentEp); else toast('Chưa có tập'); };
+    $('#btnFav').onclick=()=>toggleFav(m);
+    $('#btnShare').onclick=()=>{navigator.clipboard?.writeText(location.href); toast('Đã sao chép link')};
+    $('#btnReport').onclick=()=>{prompt('Mô tả lỗi phát (copy link này gửi cho admin):', location.href)};
+    $('#playerToolbar').style.display='flex';
+
+    $('#autoNext').checked = JSON.parse(localStorage.getItem(LS.autonext) || 'true');
+
+    openPopup(); cleanup();
     addHistory(m);
   }catch{toast('Lỗi tải chi tiết')}
 }
+function selectEp(ep, btn){
+  currentEp=ep; $$('#eps button').forEach(x=>x.classList.remove('sel')); btn.classList.add('sel');
+  $('#btnPlayNow').textContent=`Xem ngay (${ep.name})`;
+}
 function openPopup(){ $('#popup').style.display='flex'; window.scrollTo({top:0,behavior:'smooth'}) }
-function closePopup(){ cleanup(); $('#popup').style.display='none'; if(location.hash.startsWith('#/p/')) history.pushState('',document.title,window.location.pathname+window.location.search) }
+function closePopup(){
+  cleanup(); $('#popup').style.display='none';
+  if(location.hash.startsWith('#/p/')) history.pushState('',document.title,window.location.pathname+window.location.search);
+}
 $('#close').onclick=closePopup;
-function cleanup(){ if(hls){try{hls.destroy()}catch{} hls=null} $('#player').innerHTML='' }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('#popup').style.display==='flex') closePopup() });
+$('#popup').addEventListener('click',e=>{ if(e.target===e.currentTarget) closePopup() });
+
+function cleanup(){ if(hls){try{hls.destroy()}catch{} hls=null} $('#player').innerHTML='<div class="loading" id="loading"></div>'; }
+
+function createVideo(){
+  const v=document.createElement('video'); v.controls=true; v.autoplay=true; v.playsInline=true; v.crossOrigin='anonymous';
+  const vol=parseFloat(localStorage.getItem(LS.vol)||'0.9'); v.volume=isFinite(vol)?vol:0.9;
+  const rate=parseFloat(localStorage.getItem(LS.rate)||'1'); v.playbackRate=isFinite(rate)?rate:1;
+  v.addEventListener('volumechange',()=>localStorage.setItem(LS.vol, v.volume));
+  v.addEventListener('ratechange',()=>localStorage.setItem(LS.rate, v.playbackRate));
+  v.addEventListener('waiting',()=>$('#loading').style.display='grid');
+  v.addEventListener('playing',()=>$('#loading').style.display='none');
+  v.addEventListener('ended',()=>{ if($('#autoNext').checked){ const idx=currentEps.findIndex(x=>x===currentEp); const n=currentEps[idx+1]; if(n){ selectEp(n,$$('#eps button')[idx+1]); play(n); } } });
+  return v;
+}
+function buildQualityMenu(levels){
+  const sel=$('#qualitySelect'); sel.innerHTML='<option value="auto">Auto</option>';
+  (levels||[]).forEach((lv,i)=>{ const opt=document.createElement('option'); opt.value=String(lv.height||i); opt.text=`${lv.height?lv.height+'p':''}${lv.name?(' '+lv.name):''}${lv.bitrate?(' • '+Math.round(lv.bitrate/1000)+'kbps'):''}`.trim()||`Level ${i}`; sel.appendChild(opt); });
+}
+function applyQualityPreference(levels){
+  const pref=localStorage.getItem(LS.ql);
+  if(!hls) return;
+  if(!pref || pref==='auto'){ hls.currentLevel=-1; $('#qualitySelect').value='auto'; return; }
+  const idx=(levels||[]).findIndex(l=>String(l.height)===pref);
+  if(idx>=0){ hls.currentLevel=idx; $('#qualitySelect').value=String(levels[idx].height); }
+  else { hls.currentLevel=-1; $('#qualitySelect').value='auto'; }
+}
+function attachToolbar(videoEl){
+  $('#btnFS').onclick=()=>{ const c=$('#player'); if(document.fullscreenElement){document.exitFullscreen()} else { (c.requestFullscreen||c.webkitRequestFullscreen||(()=>{})).call(c) } };
+  $('#btnPiP').onclick=async()=>{ try{ if(document.pictureInPictureElement){document.exitPictureInPicture()} else if(document.pictureInPictureEnabled){ await videoEl.requestPictureInPicture() } }catch{} };
+  $('#btnReload').onclick=()=>{ if(currentEp) play(currentEp) };
+  $('#speedSelect').onchange=()=>{ videoEl.playbackRate=parseFloat($('#speedSelect').value) };
+  $('#autoNext').onchange=()=>localStorage.setItem(LS.autonext, JSON.stringify($('#autoNext').checked));
+}
+
 function play(ep){
   cleanup();
-  if(ep.m3u8 && ep.m3u8.endsWith('.m3u8')){
-    const v=document.createElement('video'); v.controls=true; v.autoplay=true; v.playsInline=true; v.crossOrigin='anonymous'; $('#player').appendChild(v);
-    if(Hls.isSupported()){
-      hls=new Hls({enableWorker:true,lowLatencyMode:true,maxBufferLength:30,maxMaxBufferLength:60});
-      hls.loadSource(ep.m3u8); hls.attachMedia(v);
-      hls.on(Hls.Events.ERROR,(_,d)=>{ if(d.fatal){ try{hls.recoverMediaError()}catch{ if(ep.embed) playEmbed(ep.embed) } } });
-    } else if(v.canPlayType('application/vnd.apple.mpegurl')){ v.src=ep.m3u8 }
-      else if(ep.embed) playEmbed(ep.embed); else toast('Thiết bị không hỗ trợ HLS');
-  }else if(ep.embed) playEmbed(ep.embed); else toast('Không có nguồn phát');
-}
-function playEmbed(u){ $('#player').innerHTML=`<iframe src="${u}" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="no-referrer" allowfullscreen></iframe>` }
+  const container=$('#player');
+  const video=createVideo(); container.appendChild(video);
+  attachToolbar(video);
 
-/* =================== Fav & History =================== */
+  if('mediaSession' in navigator){
+    try{
+      navigator.mediaSession.metadata=new MediaMetadata({title:$('#dTitle').textContent,artist:'THANHPHAT',artwork:[{src:$('#dPoster').src,sizes:'512x728',type:'image/jpeg'}]});
+    }catch{}
+  }
+
+  if(ep.m3u8 && ep.m3u8.endsWith('.m3u8')){
+    loadHlsLib(()=>{
+      if(window.Hls && window.Hls.isSupported()){
+        hls=new Hls({
+          enableWorker:true,lowLatencyMode:false,capLevelToPlayerSize:true,autoStartLoad:true,
+          maxBufferLength:25,maxMaxBufferLength:60,backBufferLength:30,
+          fragLoadingMaxRetry:2,manifestLoadingMaxRetry:2,levelLoadingMaxRetry:2
+        });
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MEDIA_ATTACHED,()=>{ hls.loadSource(ep.m3u8) });
+        hls.on(Hls.Events.MANIFEST_PARSED,()=>{ buildQualityMenu(hls.levels||[]); applyQualityPreference(hls.levels||[]); $('#loading').style.display='none' });
+        hls.on(Hls.Events.LEVEL_SWITCHED,(_,d)=>{ const lv=hls.levels?.[d.level]; if(lv?.height) localStorage.setItem(LS.ql,String(lv.height)); });
+        hls.on(Hls.Events.ERROR,(_,data)=>{ if(data.fatal){ try{ hls.recoverMediaError() }catch(e){ if(ep.embed) playEmbed(ep.embed); else toast('Nguồn HLS lỗi') } } });
+
+        $('#qualitySelect').onchange=()=>{
+          if(!hls) return;
+          const v=$('#qualitySelect').value;
+          if(v==='auto'){ hls.currentLevel=-1; localStorage.setItem(LS.ql,'auto'); }
+          else{
+            const idx=(hls.levels||[]).findIndex(l=>String(l.height)===v);
+            if(idx>=0){ hls.currentLevel=idx; localStorage.setItem(LS.ql,v); }
+          }
+        };
+      } else if(video.canPlayType('application/vnd.apple.mpegurl')){ video.src=ep.m3u8; $('#loading').style.display='none'; }
+      else { if(ep.embed) playEmbed(ep.embed); else toast('Thiết bị không hỗ trợ HLS'); }
+    });
+  }else if(ep.embed){ playEmbed(ep.embed) } else { toast('Không có nguồn phát') }
+
+  setTimeout(()=>container.scrollIntoView({behavior:'smooth',block:'center'}),80);
+}
+function playEmbed(u){
+  $('#player').innerHTML=`<iframe src="${u}" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="no-referrer" allowfullscreen></iframe>`;
+}
+
+/* Diễn viên & Gợi ý tương tự */
+function renderCast(actorField){
+  const castEl=$('#cast'); castEl.innerHTML='';
+  let names=[];
+  if(Array.isArray(actorField)) names=actorField;
+  else if(typeof actorField==='string') names=actorField.split(',').map(s=>s.trim());
+  names=names.filter(Boolean);
+  if(!names.length){ castEl.innerHTML='<span style="color:#9aa4b5">Đang cập nhật…</span>'; return; }
+  names.slice(0,20).forEach(n=>{
+    const sp=document.createElement('span'); sp.className='person'; sp.textContent=n; castEl.appendChild(sp);
+  });
+}
+async function loadSimilar(movie){
+  const cat=(movie?.category||[])[0]?.slug || (movie?.category||[])[0]?.name || '';
+  const y=movie.year||'';
+  const rowId='row-similar'; skeletonRow(rowId);
+  let items=[], cdn='https://phimimg.com';
+  if(cat){
+    try{
+      const d=normList(await fetchJSON(`${API_V1}/the-loai/${cat}?page=1&limit=36`));
+      cdn=d.cdn; items=d.items||[];
+    }catch{}
+  }
+  if(items.length && y){ items=items.filter(x=>Math.abs((x.year||0)-y)<=1); }
+  items=items.filter(x=>x.slug!==movie.slug);
+  if(!items.length){
+    const q=movie?.country?.[0]?.slug; 
+    if(q){ try{ const d=normList(await fetchJSON(`${API_V1}/quoc-gia/${q}?page=1&limit=36`)); cdn=d.cdn; items=(d.items||[]).filter(x=>x.slug!==movie.slug); }catch{} }
+  }
+  fillRow(rowId, items.slice(0,12), cdn);
+  setupRows();
+}
+
+/* =============== Fav & History =============== */
 function lsGet(k,def){try{return JSON.parse(localStorage.getItem(k)||def)}catch{return JSON.parse(def)}}
 function lsSet(k,v){localStorage.setItem(k, JSON.stringify(v))}
 function favList(){return lsGet('fav','[]')}
 function isFav(slug){return favList().some(x=>x.slug===slug)}
-function toggleFav(m){let f=favList(); if(isFav(m.slug)){f=f.filter(x=>x.slug!==m.slug); toast('Đã xoá khỏi Yêu thích')}else{f.unshift({slug:m.slug,name:m.name||m.origin_name,poster:m.poster_url||m.thumb_url,year:m.year,lang:m.lang}); toast('Đã lưu Yêu thích')} lsSet('fav',f); renderFav()}
-function renderFav(){const grid=$('#favGrid'); grid.innerHTML=''; favList().forEach(x=>{const div=card(x,'https://phimimg.com'); grid.appendChild(div)}); if(!favList().length) grid.innerHTML='<p style="color:#9aa4b5">Chưa có mục yêu thích nào.</p>'}
+function toggleFav(m){
+  let f=favList();
+  if(isFav(m.slug)){ f=f.filter(x=>x.slug!==m.slug); toast('Đã xoá khỏi Yêu thích'); }
+  else { f.unshift({slug:m.slug,name:m.name||m.origin_name,poster:m.poster_url||m.thumb_url,year:m.year,lang:m.lang}); toast('Đã lưu Yêu thích'); }
+  lsSet('fav',f); renderFav();
+}
+function renderFav(){
+  const grid=$('#favGrid'); grid.innerHTML='';
+  favList().forEach(x=>grid.appendChild(card(x,'https://phimimg.com')));
+  if(!favList().length) grid.innerHTML='<p style="color:#9aa4b5">Chưa có mục yêu thích nào.</p>';
+}
 function hisList(){return lsGet('his','[]')}
-function addHistory(m){let h=hisList().filter(x=>x.slug!==m.slug); h.unshift({slug:m.slug,name:m.name||m.origin_name,poster:m.poster_url||m.thumb_url,year:m.year,lang:m.lang}); h=h.slice(0,60); lsSet('his',h)}
-function renderHistory(){const grid=$('#hisGrid'); grid.innerHTML=''; hisList().forEach(x=>grid.appendChild(card(x,'https://phimimg.com'))); if(!hisList().length) grid.innerHTML='<p style="color:#9aa4b5">Chưa có lịch sử xem.</p>'}
+function addHistory(m){
+  let h=hisList().filter(x=>x.slug!==m.slug);
+  h.unshift({slug:m.slug,name:m.name||m.origin_name,poster:m.poster_url||m.thumb_url,year:m.year,lang:m.lang});
+  h=h.slice(0,60); lsSet('his',h);
+}
+function renderHistory(){
+  const grid=$('#hisGrid'); grid.innerHTML='';
+  hisList().forEach(x=>grid.appendChild(card(x,'https://phimimg.com')));
+  if(!hisList().length) grid.innerHTML='<p style="color:#9aa4b5">Chưa có lịch sử xem.</p>';
+}
 
-/* Row nav */
-document.addEventListener('click',e=>{const n=e.target.closest('.nav');if(!n)return;const id=n.dataset.target;const row=document.getElementById(id);row.scrollBy({left:(n.classList.contains('left')?-1:1)*row.clientWidth*.9,behavior:'smooth'})},{passive:true});
+/* =============== Row Enhancer =============== */
+function setupRows(){
+  $$('.row').forEach(w=>{
+    const row=w.querySelector('.movie-row');
+    if(!row || w.dataset.enhanced) return; w.dataset.enhanced='1';
 
-/* Routing (hash) */
-window.addEventListener('hashchange',()=>{const h=location.hash; if(h.startsWith('#/p/')) openDetail(h.split('/p/')[1]); else if(h.startsWith('#search=')){const kw=decodeURIComponent(h.split('=')[1]||''); $('#q').value=kw; startExplore(kw,`Kết quả: “${kw}”`) }});
+    // Drag to scroll
+    let isDown=false,startX=0,sl=0;
+    row.addEventListener('pointerdown',e=>{isDown=true;startX=e.clientX;sl=row.scrollLeft;row.classList.add('grabbing'); row.dataset.dragging='0';},{passive:false});
+    row.addEventListener('pointermove',e=>{
+      if(!isDown) return;
+      const dx=e.clientX-startX;
+      if(Math.abs(dx)>6) row.dataset.dragging='1';
+      row.scrollLeft=sl-dx;
+      e.preventDefault();
+    },{passive:false});
+    const end=()=>{ if(!isDown) return; isDown=false; row.classList.remove('grabbing'); setTimeout(()=>{row.dataset.dragging='0'},80); };
+    row.addEventListener('pointerup',end);
+    row.addEventListener('pointercancel',end);
+    row.addEventListener('pointerleave',end);
+
+    // Wheel dọc => cuộn ngang
+    row.addEventListener('wheel',e=>{ if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){ row.scrollBy({left:e.deltaY,behavior:'auto'}); e.preventDefault(); } },{passive:false});
+
+    // Arrow buttons
+    const left=document.createElement('button'); left.className='arrow left'; left.innerHTML='‹';
+    const right=document.createElement('button'); right.className='arrow right'; right.innerHTML='›';
+    left.onclick=()=>row.scrollBy({left:-row.clientWidth*0.9,behavior:'smooth'});
+    right.onclick=()=>row.scrollBy({left: row.clientWidth*0.9,behavior:'smooth'});
+    w.appendChild(left); w.appendChild(right);
+  });
+}
+
+/* Routing */
+window.addEventListener('hashchange',()=>{
+  const h=location.hash;
+  if(h.startsWith('#/p/')) openDetail(h.split('/p/')[1]);
+  else if(h.startsWith('#search=')){ const kw=decodeURIComponent(h.split('=')[1]||''); $('#q').value=kw; startExplore(kw,`Kết quả: “${kw}”`) }
+});
+
+/* =============== Ads lazy render =============== */
+function renderAdPlaceholder(el, text='Quảng cáo'){
+  el.innerHTML = `<div class="ad-label">Quảng cáo</div><div class="placeholder">${text}</div>`;
+}
+function mountAd(el, html, placeholderText){
+  if(!el) return;
+  if(html && html.trim()){
+    el.innerHTML = html;
+  }else{
+    renderAdPlaceholder(el, placeholderText);
+  }
+}
+function queueAd(id, placeholderText){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const obs = new IntersectionObserver((entries,observer)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        observer.unobserve(el);
+        const code = (AD_CONFIG.slots && AD_CONFIG.slots[id]) || '';
+        mountAd(el, code, placeholderText);
+      }
+    });
+  },{rootMargin:'600px'});
+  obs.observe(el);
+}
+function initStickyAd(){
+  if(!AD_CONFIG.enabled) return;
+  if(window.matchMedia('(min-width:1024px)').matches) return; // mobile only
+  if(localStorage.getItem('adStickyClosed')==='1') return;
+
+  const el = $('#adSticky'), inner=$('#adStickyInner');
+  const code = AD_CONFIG.slots && AD_CONFIG.slots.adSticky;
+  setTimeout(()=>{
+    if(code && code.trim()){ inner.innerHTML=code; } else { inner.innerHTML='<div class="placeholder">Sticky 320×50 / 320×100</div>'; }
+    el.style.display='block';
+  }, 2600);
+  $('#adStickyClose').onclick=()=>{ el.style.display='none'; localStorage.setItem('adStickyClosed','1'); };
+}
+
+/* ==== AD CONFIG ==== */
+const AD_CONFIG = {
+  enabled: true,
+  slots: {
+    adTopBillboard: ``,
+    adMidHome: ``,
+    adPlayer: ``,
+    adSticky: ``
+  }
+};
+
+function initAds(){
+  if(!AD_CONFIG.enabled) return;
+  queueAd('adTopBillboard','Billboard 970×250 / 728×90');
+  queueAd('adMidHome','In-page 728×90 / 468×60');
+  queueAd('adPlayer','Below Player 728×90 / 468×60');
+  initStickyAd();
+}
 
 /* Kickoff */
 loadHome();
+initAds();
 </script>
 </body>
-</html>
+  </html>
+
