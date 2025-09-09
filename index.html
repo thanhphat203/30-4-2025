@@ -100,18 +100,22 @@ input,button,select,textarea{font:inherit;-webkit-appearance:none}
 }
 .brand{display:flex;align-items:center;gap:10px;cursor:pointer;position:relative}
 .brand__logo{
-  width:28px;height:28px;border-radius:8px;display:grid;place-items:center;
-  background:linear-gradient(180deg,#b91c1c,#7f1d1d); /* Nâng cấp: Thay đổi gradient để giống footer-badge (màu đỏ) */
-  color:#fff; /* Nâng cấp: Màu chữ trắng giống footer */
+  width:28px;height:28px;border-radius:50%; /* Nâng cấp: Làm tròn thành circle để giống logo trong ảnh */
+  display:grid;place-items:center;
+  background:linear-gradient(180deg,#b91c1c,#7f1d1d); /* Giữ gradient đỏ */
+  color:#fff; /* Màu chữ trắng */
   font-weight:900;
-  box-shadow:0 6px 18px rgba(239,68,68,.28); /* Nâng cấp: Shadow giống footer-badge */
+  box-shadow:0 6px 18px rgba(239,68,68,.28); /* Shadow đỏ */
   position:relative;overflow:hidden;
-  border:1px solid rgba(255,255,255,.12); /* Nâng cấp: Thêm border giống footer-badge */
+  border:1px solid rgba(255,255,255,.12); /* Viền trắng mờ */
+  /* Nâng cấp: Loại bỏ ::after animation để logo rõ ràng, không bị overlay, giống ảnh đơn giản màu đỏ */
 }
 .brand__logo::after{
-  content:"";position:absolute;inset:-2px;border-radius:8px;
-  background:conic-gradient(from 0deg,#60a5fa,#a78bfa,#34d399,#60a5fa); /* Giữ animation spin nhưng điều chỉnh nếu cần */
-  mix-blend-mode:overlay;animation:spin 8s linear infinite;opacity:.6
+  /* content:"";position:absolute;inset:-2px;border-radius:50%; */
+  /* background:conic-gradient(from 0deg,#60a5fa,#a78bfa,#34d399,#60a5fa); */
+  /* mix-blend-mode:overlay;animation:spin 8s linear infinite;opacity:.6 */
+  /* Tắt animation để logo đỏ rõ nét */
+  display: none;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 .brand__t{
@@ -501,7 +505,7 @@ footer a{color:#93c5fd}
 <header class="hdr">
   <div class="hdr__row container">
     <div class="brand" id="homeBtn" title="Về Trang chủ" aria-label="Về Trang chủ">
-      <div class="brand__logo">★</div> <!-- Nâng cấp: Logo bên trái đã được style giống footer-badge (gradient đỏ, shadow, border) -->
+      <div class="brand__logo">★</div> <!-- Logo đỏ rõ nét, không animation overlay -->
       <div class="brand__t">ONFLIX</div>
     </div>
     <nav class="tabs" id="tabs" aria-label="Điều h��ớng">
